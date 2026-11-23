@@ -1,0 +1,40 @@
+{{- /* The equipment + exercise data, checked once per build. Fails the build (errorf) on bad data, so a typo in
+  data/exercises.yaml can't ship. Returns dict "equipment" "exercises" (each exercise gains "region").
+  Usage: partialCached "voltra/data.html" . "voltra-data" */ -}}
+{{- $eq := hugo.Data.equipment -}}
+{{- $list := hugo.Data.exercises -}}
+{{- if not (and $eq $list) }}{{ errorf "voltra: data/equipment.yaml and data/exercises.yaml are required" }}{{ end -}}
+{{- $anchors := slice -}}
+{{- range $eq.anchors }}{{ $anchors = $anchors | append .id }}{{ end -}}
+{{- $tokens := slice -}}
+{{- range $eq.attachments -}}
+  {{- $tokens = $tokens | append .id -}}
+  {{- if not (in (slice "bool" "qty" "pair") .count) }}{{ errorf "equipment.yaml: attachment %q has count %q (bool, qty or pair)" .id .count }}{{ end -}}
+{{- end -}}
+{{- range $k, $_ := $eq.groups }}{{ $tokens = $tokens | append $k }}{{ end -}}
+{{- $views := slice "side" "front" -}}
+{{- $bases := slice "stand" "split" "kneel" "halfkneel" "seat" "lie" -}}
+{{- $ids := slice -}}
+{{- $out := slice -}}
+{{- range $i, $e := $list -}}
+  {{- $where := printf "exercises.yaml entry %d" (add $i 1) -}}
+  {{- with $e.id }}{{ $where = printf "exercises.yaml %q" . }}{{ else }}{{ errorf "%s: missing id" $where }}{{ end -}}
+  {{- if in $ids $e.id }}{{ errorf "%s: duplicate id" $where }}{{ end -}}
+  {{- $ids = $ids | append $e.id -}}
+  {{- if not $e.name }}{{ errorf "%s: missing name" $where }}{{ end -}}
+  {{- $pat := index $eq.patterns ($e.pattern | default "") -}}
+  {{- if not $pat }}{{ errorf "%s: unknown pattern %q" $where $e.pattern }}{{ end -}}
+  {{- if not $e.setups }}{{ errorf "%s: needs at least one setup" $where }}{{ end -}}
+  {{- range $j, $s := $e.setups -}}
+    {{- $u := $s.units | default 1 -}}
+    {{- if not (in $anchors $s.anchor) }}{{ errorf "%s setup %d: unknown anchor %q" $where (add $j 1) $s.anchor }}{{ end -}}
+    {{- if not (in (slice 1 2) $u) }}{{ errorf "%s setup %d: units must be 1 or 2" $where (add $j 1) }}{{ end -}}
+    {{- if and (eq $s.anchor "platform") (eq $u 2) }}{{ errorf "%s setup %d: the Travel Platform holds one Voltra" $where (add $j 1) }}{{ end -}}
+    {{- range $s.attach }}{{ if not (in $tokens .) }}{{ errorf "%s setup %d: unknown attachment %q" $where (add $j 1) . }}{{ end }}{{ end -}}
+  {{- end -}}
+  {{- $f := $e.figure | default dict -}}
+  {{- if not (in $views ($f.view | default "side")) }}{{ errorf "%s: figure.view must be side or front" $where }}{{ end -}}
+  {{- if not (in $bases ($f.base | default "stand")) }}{{ errorf "%s: unknown figure.base %q" $where $f.base }}{{ end -}}
+  {{- $out = $out | append (merge $e (dict "region" $pat.region)) -}}
+{{- end -}}
+{{- return dict "equipment" $eq "exercises" $out -}}

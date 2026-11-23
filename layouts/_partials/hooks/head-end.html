@@ -1,0 +1,16 @@
+{{- /* Site hook (theme: layouts/_partials/hooks/head-end.html). Publishes the social preview image
+  (params.ogimage = images/og-image.png) once, made by Hugo from the logo: 1200×630 in the site's wall colour,
+  with the title in Hugo's built-in font. No external tools or requests. */ -}}
+{{- if .IsHome -}}
+  {{- with resources.Get "images/DanielSadaLogo.png" -}}
+    {{- $wall := site.Params.colors.wall | default "#3d6fd6" -}}
+    {{- $logo := .Resize "360x" -}}
+    {{- $plate := images.Padding 20 30 20 30 "#ffffff" -}}
+    {{- $pad := images.Padding 110 390 300 390 $wall -}}
+    {{- $title := images.Text site.Title (dict "color" "#ffffff" "size" 64 "x" 600 "y" 370 "alignx" "center") -}}
+    {{- $tag := images.Text (site.Params.tagline | default "") (dict "color" "#ece4ff" "size" 34 "x" 600 "y" 460 "alignx" "center") -}}
+    {{- $note := images.Text "Not affiliated with Beyond Power" (dict "color" "#d3defa" "size" 24 "x" 600 "y" 545 "alignx" "center") -}}
+    {{- $og := $logo.Filter $plate $pad $title $tag $note -}}
+    {{- ($og | resources.Copy "images/og-image.png").Publish -}}
+  {{- end -}}
+{{- end -}}

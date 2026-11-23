@@ -1,0 +1,14 @@
+{{- /* Builds assets/js/<name>-page.js with esbuild (Hugo js.Build), passing the exercise data as @params.
+  Minified + fingerprinted; loaded only on pages whose front matter sets params.script. Context: the name. */ -}}
+{{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
+{{- $src := resources.Get (printf "js/%s-page.js" .) -}}
+{{- if not $src }}{{ errorf "voltra: assets/js/%s-page.js not found (front matter params.script)" . }}{{ end -}}
+{{- $opts := dict
+  "targetPath" (printf "js/%s.js" .)
+  "format" "iife"
+  "target" "es2020"
+  "minify" true
+  "params" (dict "equipment" $data.equipment "exercises" $data.exercises "base" site.Home.RelPermalink)
+-}}
+{{- $js := $src | js.Build $opts | fingerprint -}}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>

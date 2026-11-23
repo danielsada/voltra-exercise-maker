@@ -1,0 +1,94 @@
+{{- /* Timer page: Tabata, Interval and Workout modes. Everything runs in assets/js/timer-page.js;
+  without JavaScript the page explains that the timer needs it. */ -}}
+{{- $composer := site.GetPage "/composer" -}}
+<div class="vx vx-timer">
+  <section class="card tm" aria-labelledby="page-h" id="timer">
+    <div class="tm__head">
+      <h1 id="page-h">Timer</h1>
+      <div class="seg seg--tabs js-only" role="radiogroup" aria-label="Timer mode">
+        <label><input type="radio" name="mode" value="tabata" checked><span>Tabata</span></label>
+        <label><input type="radio" name="mode" value="interval"><span>Interval</span></label>
+        <label><input type="radio" name="mode" value="workout"><span>Workout</span></label>
+      </div>
+    </div>
+
+    <noscript><p class="tm__nojs">The timer needs JavaScript. The <a href="{{ $composer.RelPermalink }}">exercise library</a> works without it.</p></noscript>
+
+    <div class="tm__stage js-only" data-phase="idle">
+      <div class="tm__dial">
+        <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="ring__track" cx="110" cy="110" r="100"/>
+          <circle class="ring__fill" id="ringfill" cx="110" cy="110" r="100" pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000" transform="rotate(-90 110 110)"/>
+          <g class="ring__check" id="ringcheck"><path d="M70 112l26 26 54-58" pathLength="1"/></g>
+        </svg>
+        <div class="tm__readout">
+          <p class="tm__phase" id="phase">Ready</p>
+          <p class="tm__time" id="time">0:00</p>
+          <p class="tm__count" id="count"></p>
+        </div>
+      </div>
+      <div class="tm__ex" id="exnow" hidden>
+        <div class="tm__fig" id="exfig" aria-hidden="true"></div>
+        <div class="tm__exinfo">
+          <p class="tm__exname" id="exname"></p>
+          <p class="tm__exside" id="exside"></p>
+          <p class="tm__exsetup" id="exsetup"></p>
+          <p class="tm__excue" id="excue"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tm__progress js-only" aria-hidden="true"><span id="totalbar"></span></div>
+    <p class="tm__totals js-only"><span id="elapsed">0:00</span> elapsed<span class="tm__dot">·</span><span id="remaining">0:00</span> left<span class="tm__next" id="next"></span></p>
+
+    <div class="tm__controls js-only">
+      <button type="button" class="btn btn--round" id="back" aria-label="Back (←)" title="Back (←)">{{ partial "breeze/icon.html" "back" }}</button>
+      <button type="button" class="btn btn--accent btn--big" id="go" aria-label="Start (Space)">{{ partial "breeze/icon.html" "play" }}<span>Start</span></button>
+      <button type="button" class="btn btn--round" id="skip" aria-label="Skip (→)" title="Skip (→)">{{ partial "breeze/icon.html" "skip" }}</button>
+      <button type="button" class="btn btn--round" id="reset" aria-label="Reset (R)" title="Reset (R)">{{ partial "breeze/icon.html" "reset" }}</button>
+    </div>
+    <div class="tm__opts js-only">
+      <label class="chk"><input type="checkbox" id="optsound" checked><span>{{ partial "breeze/icon.html" "sound" }}Beeps</span></label>
+      <label class="chk"><input type="checkbox" id="optvoice"><span>{{ partial "breeze/icon.html" "voice" }}Say exercise names</span></label>
+      <label class="chk"><input type="checkbox" id="optvibe" checked><span>Vibrate</span></label>
+    </div>
+    <p class="sr-only" id="announce" aria-live="assertive"></p>
+  </section>
+
+  <section class="card tm-set js-only" aria-labelledby="set-h">
+    <div class="card-h"><h2 id="set-h">Settings</h2><button type="button" class="tool" id="defaults">Defaults</button></div>
+    <form id="setform" class="setform" autocomplete="off">
+      <div class="setgrid" data-for="tabata interval">
+        <label class="fld fld--num"><span>Get ready</span><input type="number" name="prep" min="0" max="600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Work</span><input type="number" name="work" min="1" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Rest</span><input type="number" name="rest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Rounds</span><input type="number" name="rounds" min="1" max="99" inputmode="numeric"></label>
+        <label class="fld fld--num"><span data-label-sets>Sets</span><input type="number" name="sets" min="1" max="50" inputmode="numeric"></label>
+        <label class="fld fld--num"><span>Rest between sets</span><input type="number" name="setRest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+      </div>
+      <div class="setgrid" data-for="workout" hidden>
+        <fieldset class="fld fld--wide">
+          <legend>Each exercise is</legend>
+          <div class="seg">
+            <label><input type="radio" name="format" value="tabata" checked><span>A Tabata</span></label>
+            <label><input type="radio" name="format" value="interval"><span>Interval rounds</span></label>
+          </div>
+        </fieldset>
+        <label class="fld fld--num"><span>Get ready</span><input type="number" name="wprep" min="0" max="600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Work</span><input type="number" name="wwork" min="1" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Rest</span><input type="number" name="wrest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Rounds</span><input type="number" name="wrounds" min="1" max="99" inputmode="numeric"></label>
+        <label class="fld fld--num"><span>Rest between exercises</span><input type="number" name="exRest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Circuits</span><input type="number" name="circuits" min="1" max="20" inputmode="numeric"></label>
+        <label class="fld fld--num"><span>Rest between circuits</span><input type="number" name="circuitRest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+      </div>
+      <p class="setnote" id="setnote"></p>
+    </form>
+  </section>
+
+  <section class="card tm-plan js-only" aria-labelledby="plan-h" id="plan" hidden>
+    <div class="card-h"><h2 id="plan-h">Workout</h2><a href="{{ $composer.RelPermalink }}" id="planedit">Edit in composer →</a></div>
+    <ol class="worklist worklist--plan" id="planlist"></ol>
+    <p class="worklist__empty" id="planempty">No workout yet. <a href="{{ $composer.RelPermalink }}">Compose one</a> and press <b>Start in timer</b>.</p>
+  </section>
+</div>

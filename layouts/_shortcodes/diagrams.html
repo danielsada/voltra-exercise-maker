@@ -1,0 +1,14 @@
+{{- /* Setup diagrams, drawn by assets/js/equipment-page.js. One line per diagram:
+  "<anchor> <units> | <title> | <caption>". Without JavaScript the captions still read as a list. */ -}}
+<div class="diagrams">
+{{- range split (strings.TrimSpace .Inner) "\n" }}
+  {{- $parts := split . "|" -}}
+  {{- if eq (len $parts) 3 }}
+  {{- $key := split (strings.TrimSpace (index $parts 0)) " " }}
+  <figure class="diagram" data-anchor="{{ index $key 0 }}" data-units="{{ index $key 1 }}">
+    <div class="diagram__fig" aria-hidden="true"></div>
+    <figcaption><b>{{ strings.TrimSpace (index $parts 1) }}</b> {{ strings.TrimSpace (index $parts 2) }}</figcaption>
+  </figure>
+  {{- end }}
+{{- end }}
+</div>

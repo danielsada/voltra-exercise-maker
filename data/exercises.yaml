@@ -1,0 +1,793 @@
+# The exercise library. Every exercise lists one or more `setups`; it's possible when ANY setup fits your
+# equipment (assets/js/lib/equipment.js). The build checks this file (layouts/_partials/voltra/data.html).
+#
+#   id, name, pattern (see data/equipment.yaml → patterns), muscles, cue, unilateral (true = "each side")
+#   setups:
+#     - anchor: pullup | high | mid | low | platform
+#       units: 1 | 2            (how many Voltras; each needs its own anchor point, except on a pull-up bar)
+#       attach: [ids or groups] (any of these; see data/equipment.yaml)
+#       need: 2                 (how many of them, e.g. a handle per Voltra)
+#       unilateral: false       (optional override, e.g. both arms at once with two Voltras)
+#       note: "..."             (shown with the setup)
+#       fig: { ... }            (optional figure overrides for this setup; `pose` is merged)
+#   figure: the stick figure (assets/js/lib/figure.js explains the angles)
+#     view: side | front, base: stand | split | kneel | halfkneel | seat | lie,
+#     attach: hands | ankle | harness, hand: L | R (front view, one hand), from: front | back (side) or L | R (front),
+#     dist (anchor distance, side view), dx (pull-up bar offset), tempo (seconds per rep),
+#     pose: shared angles, poses: 1–3 keyframes played forward and back.
+#
+# Names and cues are our own, written for this site. Use the manufacturer's instructions for safe setup.
+
+# ---------------------------------------------------------------- Lower body
+- id: squat
+  name: Squat
+  pattern: squat
+  muscles: [quads, glutes]
+  cue: Sit between your heels, chest up, then drive the floor away.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, handle], note: "Hold the bar or handle at your chest." }
+    - { anchor: low, units: 1, attach: [bar1, handle], note: "Face the anchor and hold at your chest." }
+    - { anchor: low, units: 2, attach: [bar2], note: "One Voltra on each side, bar at your shoulders." }
+    - { anchor: low, units: 2, attach: [handle], need: 2, note: "One Voltra on each side, a handle at each shoulder." }
+  figure:
+    tempo: 3.2
+    pose: { shoulder: 25, elbow: 145 }
+    poses:
+      - { torso: 4, thigh: 0, knee: 0 }
+      - { torso: 32, thigh: 85, knee: 110 }
+
+- id: harness-squat
+  name: Harness squat
+  pattern: squat
+  muscles: [quads, glutes]
+  cue: Stand tall in the harness, sit straight down and stand back up; your hands stay free.
+  setups:
+    - { anchor: platform, units: 1, attach: [squat-harness], note: "Clip the harness to the Voltra on the platform." }
+  figure:
+    attach: harness
+    tempo: 3.2
+    pose: { shoulder: 50, elbow: 40 }
+    poses:
+      - { torso: 2, thigh: 0, knee: 0 }
+      - { torso: 18, thigh: 85, knee: 115 }
+
+- id: thruster
+  name: Thruster
+  pattern: squat
+  muscles: [quads, glutes, shoulders]
+  cue: Squat, then use the drive up to press overhead in one motion.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1] }
+    - { anchor: low, units: 2, attach: [handle], need: 2, note: "One Voltra on each side." }
+    - { anchor: low, units: 2, attach: [bar2] }
+  figure:
+    tempo: 3.6
+    poses:
+      - { torso: 4, thigh: 0, knee: 0, shoulder: 25, elbow: 145 }
+      - { torso: 30, thigh: 85, knee: 110, shoulder: 25, elbow: 145 }
+      - { torso: 0, thigh: 0, knee: 0, shoulder: 175, elbow: 5 }
+
+- id: romanian-deadlift
+  name: Romanian deadlift
+  pattern: hinge
+  muscles: [hamstrings, glutes, lower back]
+  cue: Soft knees, push your hips back until you feel the hamstrings, then squeeze the glutes to stand.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, handle] }
+    - { anchor: low, units: 1, attach: [bar1, handle, functional-rope], note: "Face the anchor, a step away." }
+    - { anchor: low, units: 2, attach: [bar2] }
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+  figure:
+    tempo: 3.4
+    poses:
+      - { torso: 3, thigh: 5, knee: 5, shoulder: 3, elbow: 0 }
+      - { torso: 75, thigh: 22, knee: 22, shoulder: 75, elbow: 0 }
+
+- id: deadlift
+  name: Deadlift
+  pattern: hinge
+  muscles: [glutes, hamstrings, quads, back]
+  cue: Bar close, flat back, push the floor away and finish standing tall.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, handle] }
+    - { anchor: low, units: 2, attach: [bar2], note: "One Voltra on each side of your feet." }
+  figure:
+    tempo: 3.4
+    poses:
+      - { torso: 3, thigh: 3, knee: 3, shoulder: 3, elbow: 0 }
+      - { torso: 58, thigh: 62, knee: 85, shoulder: 58, elbow: 0 }
+
+- id: single-leg-rdl
+  name: Single-leg Romanian deadlift
+  pattern: hinge
+  muscles: [hamstrings, glutes, balance]
+  unilateral: true
+  cue: Hinge on one leg while the other reaches back; keep your hips square.
+  setups:
+    - { anchor: platform, units: 1, attach: [handle] }
+    - { anchor: low, units: 1, attach: [handle], note: "Face the anchor; hold the handle on the side of the lifted leg." }
+  figure:
+    tempo: 3.6
+    poses:
+      - { torso: 3, thigh: 5, knee: 5, thigh2: 0, knee2: 10, shoulder: 3, elbow: 0 }
+      - { torso: 78, thigh: 18, knee: 18, thigh2: -78, knee2: 0, shoulder: 78, elbow: 0 }
+
+- id: pull-through
+  name: Pull-through
+  pattern: glutes
+  muscles: [glutes, hamstrings]
+  cue: Face away from the anchor, rope between your legs; hinge back and snap the hips forward.
+  setups:
+    - { anchor: low, units: 1, attach: [functional-rope, handle] }
+  figure:
+    from: back
+    dist: 62
+    tempo: 3
+    poses:
+      - { torso: 0, thigh: 5, knee: 5, shoulder: -5, elbow: 0 }
+      - { torso: 70, thigh: 25, knee: 30, shoulder: 52, elbow: 0 }
+
+- id: split-squat
+  name: Split squat
+  pattern: lunge
+  muscles: [quads, glutes]
+  unilateral: true
+  cue: Long stance, drop the back knee straight down, front heel stays planted.
+  setups:
+    - { anchor: low, units: 2, attach: [handle], need: 2, note: "One Voltra on each side, handles at your sides." }
+    - { anchor: low, units: 1, attach: [handle, bar1], note: "Face the anchor and hold at your chest.", fig: { pose: { shoulder: 25, elbow: 145 } } }
+    - { anchor: platform, units: 1, attach: [handle], note: "Front foot on the platform, handle at your chest.", fig: { pose: { shoulder: 25, elbow: 145 } } }
+  figure:
+    base: split
+    tempo: 3.2
+    pose: { torso: 4, shoulder: 0, elbow: 5 }
+    poses:
+      - { thigh: 15, knee: 15, thigh2: -18, knee2: 0 }
+      - { thigh: 85, knee: 90, thigh2: -5, knee2: 82 }
+
+- id: glute-kickback
+  name: Glute kickback
+  pattern: glutes
+  muscles: [glutes]
+  unilateral: true
+  cue: Face the anchor, hands on something steady; kick the strapped leg back without arching.
+  setups:
+    - { anchor: low, units: 1, attach: [ankle-strap] }
+  figure:
+    attach: ankle
+    dist: 58
+    tempo: 2.6
+    pose: { torso: 28, shoulder: 70, elbow: 0 }
+    poses:
+      - { thigh2: 4, knee2: 12 }
+      - { thigh2: -48, knee2: 10 }
+
+- id: standing-leg-curl
+  name: Standing leg curl
+  pattern: glutes
+  muscles: [hamstrings]
+  unilateral: true
+  cue: Face the anchor, thigh still; curl the heel toward your glute.
+  setups:
+    - { anchor: low, units: 1, attach: [ankle-strap] }
+  figure:
+    attach: ankle
+    dist: 58
+    tempo: 2.6
+    pose: { torso: 12, shoulder: 60, elbow: 0 }
+    poses:
+      - { thigh2: -2, knee2: 4 }
+      - { thigh2: -8, knee2: 105 }
+
+- id: hip-abduction
+  name: Standing hip abduction
+  pattern: glutes
+  muscles: [glute medius, hips]
+  unilateral: true
+  cue: Anchor on the side of the standing leg; sweep the strapped leg out and control it back.
+  setups:
+    - { anchor: low, units: 1, attach: [ankle-strap] }
+  figure:
+    view: front
+    attach: ankle
+    from: L
+    tempo: 2.4
+    pose: { stance: 4, abduct: 25, elbow: 10 }
+    poses:
+      - { leg2: 2 }
+      - { leg2: 38 }
+
+- id: knee-drive
+  name: Standing knee drive
+  pattern: core
+  muscles: [hip flexors, abs]
+  unilateral: true
+  cue: Face away from the anchor, brace, and drive the strapped knee up to hip height.
+  setups:
+    - { anchor: low, units: 1, attach: [ankle-strap] }
+  figure:
+    attach: ankle
+    from: back
+    dist: 56
+    tempo: 2.2
+    pose: { torso: 0, shoulder: 30, elbow: 70 }
+    poses:
+      - { thigh2: -12, knee2: 5 }
+      - { thigh2: 88, knee2: 95 }
+
+# ---------------------------------------------------------------- Push
+- id: chest-press
+  name: Standing chest press
+  pattern: push-horizontal
+  muscles: [chest, triceps, front delts]
+  cue: Face away from the anchors in a split stance; press forward and slightly together.
+  setups:
+    - { anchor: mid, units: 2, attach: [handle], need: 2, note: "One Voltra on each side behind you." }
+  figure:
+    base: split
+    from: back
+    dist: 66
+    tempo: 2.8
+    pose: { torso: 12, thigh: 15, knee: 15, thigh2: -18, knee2: 0 }
+    poses:
+      - { shoulder: -48, elbow: 150 }
+      - { shoulder: 100, elbow: 4 }
+
+- id: single-arm-chest-press
+  name: Single-arm chest press
+  pattern: push-horizontal
+  muscles: [chest, triceps, core]
+  unilateral: true
+  cue: Split stance, anchor behind you; press without letting your torso twist.
+  setups:
+    - { anchor: mid, units: 1, attach: [handle] }
+  figure:
+    base: split
+    from: back
+    dist: 66
+    tempo: 2.8
+    pose: { torso: 12, thigh: 15, knee: 15, thigh2: -18, knee2: 0, shoulder2: 10, elbow2: 20 }
+    poses:
+      - { shoulder: -48, elbow: 150 }
+      - { shoulder: 100, elbow: 4 }
+
+- id: chest-fly
+  name: Chest fly
+  pattern: push-horizontal
+  muscles: [chest, front delts]
+  cue: Anchors at chest height on each side; hug a big tree with soft elbows.
+  setups:
+    - { anchor: mid, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    tempo: 3
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 88, elbow: 12, flex: 0 }
+      - { abduct: 88, elbow: 12, flex: 80 }
+
+- id: low-to-high-fly
+  name: Low-to-high fly
+  pattern: push-horizontal
+  muscles: [upper chest, front delts]
+  cue: Anchors low on each side; sweep the handles up and together to eye level.
+  setups:
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    tempo: 3
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 30, elbow: 8, flex: 0 }
+      - { abduct: 130, elbow: 8, flex: 70 }
+
+- id: high-to-low-fly
+  name: High-to-low fly
+  pattern: push-horizontal
+  muscles: [lower chest]
+  cue: Anchors overhead on each side; pull the handles down and together in front of your hips.
+  setups:
+    - { anchor: high, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    tempo: 3
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 125, elbow: 10, flex: 0 }
+      - { abduct: 25, elbow: 10, flex: 45 }
+
+- id: overhead-press
+  name: Overhead press
+  pattern: push-vertical
+  muscles: [shoulders, triceps]
+  cue: Ribs down, press straight up until your biceps reach your ears.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1], note: "Stand on the platform; the bar starts at your shoulders." }
+    - { anchor: low, units: 2, attach: [handle], need: 2, note: "One Voltra on each side of your feet." }
+    - { anchor: low, units: 2, attach: [bar2] }
+  figure:
+    view: front
+    tempo: 2.8
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 35, elbow: 135 }
+      - { abduct: 168, elbow: 4 }
+
+- id: single-arm-overhead-press
+  name: Single-arm overhead press
+  pattern: push-vertical
+  muscles: [shoulders, triceps, core]
+  unilateral: true
+  cue: Brace against the lean and press straight up beside your head.
+  setups:
+    - { anchor: platform, units: 1, attach: [handle] }
+    - { anchor: low, units: 1, attach: [handle], note: "Stand next to the anchor, working arm on the anchor side." }
+  figure:
+    view: front
+    hand: R
+    from: R
+    tempo: 2.8
+    pose: { stance: 10, abductL: 18, elbowL: 10 }
+    poses:
+      - { abductR: 35, elbowR: 135 }
+      - { abductR: 168, elbowR: 4 }
+
+- id: triceps-pushdown
+  name: Triceps pushdown
+  pattern: triceps
+  muscles: [triceps]
+  cue: Elbows pinned to your sides; push down until your arms are straight.
+  setups:
+    - { anchor: high, units: 1, attach: [functional-rope, bar1, handle], note: "Stand close, facing the anchor." }
+    - { anchor: pullup, units: 1, attach: [functional-rope, bar1, handle], note: "Stand just behind the Voltra." }
+  figure:
+    dist: 34
+    dx: 26
+    tempo: 2.4
+    pose: { torso: 12, shoulder: 2 }
+    poses:
+      - { elbow: 112 }
+      - { elbow: 8 }
+
+- id: overhead-triceps-extension
+  name: Overhead triceps extension
+  pattern: triceps
+  muscles: [triceps]
+  cue: Face away from the anchor, elbows by your ears; straighten your arms forward and up.
+  setups:
+    - { anchor: low, units: 1, attach: [functional-rope, handle] }
+    - { anchor: mid, units: 1, attach: [functional-rope, handle] }
+  figure:
+    base: split
+    from: back
+    dist: 50
+    tempo: 2.6
+    pose: { torso: 22, thigh: 15, knee: 15, thigh2: -18, knee2: 0, shoulder: 165 }
+    poses:
+      - { elbow: 135 }
+      - { elbow: 8 }
+
+- id: triceps-kickback
+  name: Triceps kickback
+  pattern: triceps
+  muscles: [triceps]
+  unilateral: true
+  cue: Hinge forward, upper arm along your side; straighten the elbow back.
+  setups:
+    - { anchor: low, units: 1, attach: [handle] }
+    - { anchor: platform, units: 1, attach: [handle], fig: { pose: { torso: 50 } } }
+  figure:
+    dist: 64
+    tempo: 2.4
+    pose: { torso: 58, thigh: 18, knee: 22, shoulder: -4, shoulder2: 70, elbow2: 20 }
+    poses:
+      - { elbow: 62 }
+      - { elbow: 2 }
+
+# ---------------------------------------------------------------- Pull
+- id: lat-pulldown
+  name: Kneeling lat pulldown
+  pattern: pull-vertical
+  muscles: [lats, biceps, rear delts]
+  cue: Kneel under the bar, chest proud; pull your elbows down to your ribs.
+  setups:
+    - { anchor: pullup, units: 1, attach: [bar1, functional-rope], note: "One Voltra on the bar, centred above you." }
+    - { anchor: pullup, units: 2, attach: [handle], need: 2, note: "Both Voltras on the bar, shoulder-width apart." }
+    - { anchor: pullup, units: 2, attach: [bar2] }
+    - { anchor: high, units: 1, attach: [bar1, functional-rope], note: "Kneel a little behind the anchor.", fig: { view: side, poses: [ { shoulder: 160, elbow: 5 }, { shoulder: 10, elbow: 140 } ], dist: 36 } }
+  figure:
+    view: front
+    base: kneel
+    tempo: 3
+    poses:
+      - { abduct: 162, elbow: 8 }
+      - { abduct: 42, elbow: 128 }
+
+- id: single-arm-pulldown
+  name: Single-arm pulldown
+  pattern: pull-vertical
+  muscles: [lats, biceps]
+  unilateral: true
+  cue: Kneel under the anchor; pull the elbow down to your hip without leaning away.
+  setups:
+    - { anchor: pullup, units: 1, attach: [handle] }
+    - { anchor: high, units: 1, attach: [handle] }
+  figure:
+    view: front
+    base: kneel
+    hand: R
+    from: R
+    tempo: 2.8
+    pose: { abductL: 20, elbowL: 30 }
+    poses:
+      - { abductR: 162, elbowR: 8 }
+      - { abductR: 40, elbowR: 128 }
+
+- id: straight-arm-pulldown
+  name: Straight-arm pulldown
+  pattern: pull-vertical
+  muscles: [lats, triceps (long head)]
+  cue: Slight hinge, arms long; sweep the bar down to your thighs.
+  setups:
+    - { anchor: high, units: 1, attach: [bar1, functional-rope] }
+    - { anchor: pullup, units: 1, attach: [bar1, functional-rope] }
+  figure:
+    dist: 62
+    dx: 40
+    tempo: 2.8
+    pose: { torso: 24, thigh: 10, knee: 12 }
+    poses:
+      - { shoulder: 150, elbow: 6 }
+      - { shoulder: 24, elbow: 4 }
+
+- id: seated-row
+  name: Seated row
+  pattern: pull-horizontal
+  muscles: [mid back, lats, biceps]
+  cue: Sit tall facing the anchor, legs long; pull the elbows back and squeeze the shoulder blades.
+  setups:
+    - { anchor: low, units: 1, attach: [handle, bar1, functional-rope] }
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+  figure:
+    base: seat
+    x: 64
+    dist: 98
+    tempo: 2.8
+    pose: { torso: -4, thigh: 86, knee: 12 }
+    poses:
+      - { shoulder: 56, elbow: 4 }
+      - { shoulder: 18, elbow: 64 }
+      - { shoulder: -44, elbow: 122 }
+
+- id: bent-over-row
+  name: Bent-over row
+  pattern: pull-horizontal
+  muscles: [upper back, lats, biceps]
+  cue: Hinge to about 45°, flat back; row toward your hips.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, handle] }
+    - { anchor: low, units: 2, attach: [bar2] }
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+  figure:
+    tempo: 2.8
+    pose: { torso: 58, thigh: 22, knee: 28 }
+    poses:
+      - { shoulder: 58, elbow: 0 }
+      - { shoulder: 24, elbow: 36 }
+      - { shoulder: -14, elbow: 72 }
+
+- id: standing-row
+  name: Standing row
+  pattern: pull-horizontal
+  muscles: [mid back, lats, biceps]
+  cue: Face the anchor in a split stance; row to your lower ribs.
+  setups:
+    - { anchor: mid, units: 1, attach: [bar1, functional-rope, handle] }
+    - { anchor: mid, units: 2, attach: [handle], need: 2 }
+  figure:
+    base: split
+    dist: 70
+    tempo: 2.8
+    pose: { torso: 8, thigh: 15, knee: 15, thigh2: -18, knee2: 0 }
+    poses:
+      - { shoulder: 95, elbow: 5 }
+      - { shoulder: 40, elbow: 95 }
+      - { shoulder: -48, elbow: 140 }
+
+- id: single-arm-row
+  name: Single-arm row
+  pattern: pull-horizontal
+  muscles: [lats, mid back, biceps]
+  unilateral: true
+  cue: Split stance, free hand on your hip; row without rotating.
+  setups:
+    - { anchor: mid, units: 1, attach: [handle] }
+    - { anchor: low, units: 1, attach: [handle], fig: { pose: { torso: 40 }, poses: [ { shoulder: 85, elbow: 5 }, { shoulder: 30, elbow: 70 }, { shoulder: -30, elbow: 110 } ] } }
+  figure:
+    base: split
+    dist: 70
+    tempo: 2.8
+    pose: { torso: 8, thigh: 15, knee: 15, thigh2: -18, knee2: 0, shoulder2: 5, elbow2: 60 }
+    poses:
+      - { shoulder: 95, elbow: 5 }
+      - { shoulder: 40, elbow: 95 }
+      - { shoulder: -48, elbow: 140 }
+
+- id: face-pull
+  name: Face pull
+  pattern: shoulders
+  muscles: [rear delts, upper back, rotator cuff]
+  cue: Pull the rope apart toward your forehead, elbows high.
+  setups:
+    - { anchor: high, units: 1, attach: [functional-rope] }
+    - { anchor: mid, units: 1, attach: [functional-rope], fig: { poses: [ { shoulder: 92, elbow: 5 }, { shoulder: 92, elbow: 140 } ] } }
+  figure:
+    base: split
+    dist: 74
+    tempo: 2.6
+    pose: { torso: -4, thigh: 15, knee: 15, thigh2: -18, knee2: 0 }
+    poses:
+      - { shoulder: 118, elbow: 5 }
+      - { shoulder: 98, elbow: 138 }
+
+- id: reverse-fly
+  name: Reverse fly
+  pattern: shoulders
+  muscles: [rear delts, upper back]
+  cue: Cables crossed in front of you; open your arms wide like a T.
+  setups:
+    - { anchor: mid, units: 2, attach: [handle], need: 2 }
+    - { anchor: high, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    cross: true
+    tempo: 2.8
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 88, elbow: 8, flex: 78 }
+      - { abduct: 88, elbow: 8, flex: 0 }
+
+- id: lateral-raise
+  name: Lateral raise
+  pattern: shoulders
+  muscles: [side delts]
+  unilateral: true
+  cue: Lead with the elbow, raise to shoulder height, lower slowly.
+  setups:
+    - { anchor: low, units: 1, attach: [handle], note: "Anchor on the other side; the cable crosses in front of you." }
+    - { anchor: platform, units: 1, attach: [handle] }
+    - { anchor: low, units: 2, attach: [handle], need: 2, unilateral: false, note: "Both arms; the cables cross in front of you.", fig: { cross: true, pose: { abductL: null, elbowL: null }, poses: [ { abduct: 10, elbow: 6 }, { abduct: 86, elbow: 8 } ] } }
+  figure:
+    view: front
+    hand: R
+    from: L
+    tempo: 2.6
+    pose: { stance: 8, abductL: 18, elbowL: 10 }
+    poses:
+      - { abductR: 8, elbowR: 6 }
+      - { abductR: 86, elbowR: 8 }
+
+- id: front-raise
+  name: Front raise
+  pattern: shoulders
+  muscles: [front delts]
+  cue: Arms long, raise to eye level and lower slowly.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, functional-rope, handle] }
+    - { anchor: low, units: 1, attach: [bar1, functional-rope], note: "Face away from the anchor, cable between your legs." }
+  figure:
+    from: back
+    dist: 50
+    tempo: 2.6
+    poses:
+      - { shoulder: 4, elbow: 4 }
+      - { shoulder: 100, elbow: 4 }
+
+- id: y-raise
+  name: Y raise
+  pattern: shoulders
+  muscles: [lower traps, side delts]
+  cue: Anchors low on each side; raise the arms up and out into a Y.
+  setups:
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    tempo: 2.8
+    pose: { stance: 10 }
+    poses:
+      - { abduct: 18, elbow: 6 }
+      - { abduct: 148, elbow: 6 }
+
+- id: upright-row
+  name: Upright row
+  pattern: shoulders
+  muscles: [side delts, traps]
+  cue: Hands close, pull up along your body until the elbows reach shoulder height.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, functional-rope, handle] }
+    - { anchor: low, units: 1, attach: [bar1, functional-rope] }
+    - { anchor: low, units: 2, attach: [bar2] }
+  figure:
+    view: front
+    tempo: 2.6
+    pose: { stance: 10, reach: 0 }
+    poses:
+      - { ext: 0.94 }
+      - { ext: 0.12 }
+
+# ---------------------------------------------------------------- Arms
+- id: biceps-curl
+  name: Biceps curl
+  pattern: biceps
+  muscles: [biceps, forearms]
+  cue: Elbows by your sides; curl up and lower under control.
+  setups:
+    - { anchor: platform, units: 1, attach: [bar1, handle, functional-rope] }
+    - { anchor: low, units: 1, attach: [bar1, functional-rope, handle], note: "Face the anchor, a step away." }
+    - { anchor: low, units: 2, attach: [handle], need: 2 }
+    - { anchor: low, units: 2, attach: [bar2] }
+  figure:
+    dist: 52
+    tempo: 2.6
+    pose: { torso: 0 }
+    poses:
+      - { shoulder: 2, elbow: 5 }
+      - { shoulder: 12, elbow: 140 }
+
+- id: hammer-curl
+  name: Rope hammer curl
+  pattern: biceps
+  muscles: [brachialis, biceps, forearms]
+  cue: Thumbs up on the rope; curl and spread the ends at the top.
+  setups:
+    - { anchor: platform, units: 1, attach: [functional-rope] }
+    - { anchor: low, units: 1, attach: [functional-rope] }
+  figure:
+    dist: 52
+    tempo: 2.6
+    poses:
+      - { shoulder: 2, elbow: 5 }
+      - { shoulder: 10, elbow: 135 }
+
+- id: single-arm-curl
+  name: Single-arm curl
+  pattern: biceps
+  muscles: [biceps]
+  unilateral: true
+  cue: Free hand on your hip; curl without swinging.
+  setups:
+    - { anchor: platform, units: 1, attach: [handle] }
+    - { anchor: low, units: 1, attach: [handle] }
+  figure:
+    dist: 52
+    tempo: 2.6
+    pose: { shoulder2: 5, elbow2: 60 }
+    poses:
+      - { shoulder: 2, elbow: 5 }
+      - { shoulder: 12, elbow: 140 }
+
+- id: overhead-curl
+  name: Overhead curl
+  pattern: biceps
+  muscles: [biceps]
+  cue: Anchors overhead on each side, arms out like a T; curl the handles to your ears.
+  setups:
+    - { anchor: high, units: 2, attach: [handle], need: 2 }
+  figure:
+    view: front
+    tempo: 2.6
+    pose: { stance: 10, abduct: 95 }
+    poses:
+      - { elbow: 6 }
+      - { elbow: 120 }
+
+# ---------------------------------------------------------------- Core
+- id: pallof-press
+  name: Pallof press
+  pattern: core
+  muscles: [obliques, deep core]
+  unilateral: true
+  cue: Stand side-on to the anchor; press the handle straight out and don't let it pull you round.
+  setups:
+    - { anchor: mid, units: 1, attach: [handle, functional-rope] }
+  figure:
+    view: front
+    from: R
+    tempo: 3.2
+    pose: { stance: 12, squat: 10 }
+    poses:
+      - { abduct: 10, elbow: 227, flex: 30 }
+      - { abduct: -40, elbow: 360, flex: 70 }
+
+- id: woodchop
+  name: High-to-low woodchop
+  pattern: rotation
+  muscles: [obliques, core, shoulders]
+  unilateral: true
+  cue: Arms long, rotate from the hips and chop down across your body.
+  setups:
+    - { anchor: high, units: 1, attach: [handle, functional-rope] }
+    - { anchor: pullup, units: 1, attach: [handle, functional-rope], note: "Stand to one side of the bar." }
+  figure:
+    view: front
+    from: R
+    tempo: 2.8
+    pose: { stance: 14 }
+    poses:
+      - { reach: 145, ext: 0.92, lean: 6, squat: 0 }
+      - { reach: 50, ext: 0.45, lean: 0, squat: 15 }
+      - { reach: -35, ext: 0.92, lean: -6, squat: 30 }
+
+- id: low-to-high-chop
+  name: Low-to-high chop
+  pattern: rotation
+  muscles: [obliques, glutes, shoulders]
+  unilateral: true
+  cue: Start low by one foot, drive through the hips and finish high across your body.
+  setups:
+    - { anchor: low, units: 1, attach: [handle, functional-rope] }
+    - { anchor: platform, units: 1, attach: [handle, functional-rope] }
+  figure:
+    view: front
+    from: R
+    tempo: 2.8
+    pose: { stance: 14 }
+    poses:
+      - { reach: 35, ext: 0.92, lean: 6, squat: 30 }
+      - { reach: -40, ext: 0.45, lean: 0, squat: 15 }
+      - { reach: -145, ext: 0.92, lean: -6, squat: 0 }
+
+- id: horizontal-chop
+  name: Standing rotation
+  pattern: rotation
+  muscles: [obliques, core]
+  unilateral: true
+  cue: Side-on to the anchor, arms long at chest height; rotate away and back slowly.
+  setups:
+    - { anchor: mid, units: 1, attach: [handle, functional-rope] }
+  figure:
+    view: front
+    from: R
+    tempo: 3
+    pose: { stance: 14, squat: 10 }
+    poses:
+      - { reach: 80, ext: 0.9 }
+      - { reach: 0, ext: 0.35 }
+      - { reach: -80, ext: 0.9 }
+
+- id: kneeling-crunch
+  name: Kneeling cable crunch
+  pattern: core
+  muscles: [abs]
+  cue: Kneel facing the anchor, rope by your ears; curl your ribs toward your hips.
+  setups:
+    - { anchor: pullup, units: 1, attach: [functional-rope] }
+    - { anchor: high, units: 1, attach: [functional-rope] }
+  figure:
+    base: kneel
+    dist: 40
+    dx: 26
+    tempo: 2.8
+    pose: { shoulder: 168, elbow: 150 }
+    poses:
+      - { torso: 0, thigh: 0 }
+      - { torso: 72, thigh: 18 }
+
+- id: side-bend
+  name: Side bend
+  pattern: core
+  muscles: [obliques]
+  unilateral: true
+  cue: Handle at your side; bend toward it, then pull yourself upright with the opposite side.
+  setups:
+    - { anchor: platform, units: 1, attach: [handle] }
+    - { anchor: low, units: 1, attach: [handle], note: "Stand side-on to the anchor." }
+  figure:
+    view: front
+    hand: R
+    from: R
+    tempo: 2.8
+    pose: { stance: 10, abductR: 4, elbowR: 4, abductL: 150, elbowL: 120 }
+    poses:
+      - { lean: 14 }
+      - { lean: -12 }

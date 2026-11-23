@@ -1,0 +1,10 @@
+{{- /* Home widget: the hobby-project disclaimer, in the theme's warm note card. Context: dict "page" "cfg". */ -}}
+<section class="card card--note seccard" aria-labelledby="disc-h">
+  <div class="card-h"><h2 id="disc-h">{{ .cfg.title | default "Hobby project" }}</h2></div>
+  <p>Daniel Sada made this page to plan his own Voltra training. It is <b>not affiliated with, endorsed by or
+  sponsored by Beyond Power</b>, and VOLTRA is their trademark.</p>
+  <p>Exercise names, cues and drawings are original to this site. Check the
+  <a href="{{ site.Params.voltra.official }}" rel="noopener">official Beyond Power site</a> for mounting and safety,
+  and train within your limits.</p>
+  <p class="more"><a href="{{ (site.GetPage "/equipment").RelPermalink }}">How the equipment is modelled →</a></p>
+</section>

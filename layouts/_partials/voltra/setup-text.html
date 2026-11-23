@@ -1,0 +1,17 @@
+{{- /* "Torso height · 2 Voltras · Basic Handle or Ring Handle ×2" (mirrors describeSetup in assets/js/lib/equipment.js).
+  Context: dict "setup" "eq". */ -}}
+{{- $s := .setup -}}
+{{- $eq := .eq -}}
+{{- $anchor := $s.anchor -}}
+{{- range $eq.anchors }}{{ if eq .id $s.anchor }}{{ $anchor = .name }}{{ end }}{{ end -}}
+{{- $u := $s.units | default 1 -}}
+{{- $names := slice -}}
+{{- range $s.attach -}}
+  {{- $t := . -}}
+  {{- $n := index $eq.groups $t | default $t -}}
+  {{- range $eq.attachments }}{{ if eq .id $t }}{{ $n = .name }}{{ end }}{{ end -}}
+  {{- $names = $names | append $n -}}
+{{- end -}}
+{{ $anchor }} · {{ cond (eq $u 2) "2 Voltras" "1 Voltra" }}
+{{- with $names }} · {{ delimit . " or " }}{{ if gt ($s.need | default 1) 1 }} ×{{ $s.need }}{{ end }}{{ end -}}
+{{- with $s.note }}<small> {{ . }}</small>{{ end -}}

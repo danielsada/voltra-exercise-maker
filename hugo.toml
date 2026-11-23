@@ -1,0 +1,110 @@
+# Voltra Exercise Maker: Hugo site config. Theme: themes/hugo-breeze-plasma-inspired-theme (vendored copy, see README.md).
+# Requires Hugo >= 0.158 (built and deployed with 0.170.1; see README.md > Deploy).
+baseURL = "https://danielsada.github.io/voltra-exercise-maker/"
+title = "Voltra Exercise Maker"
+theme = "hugo-breeze-plasma-inspired-theme"
+locale = "en-US"
+defaultContentLanguage = "en"
+capitalizeListTitles = false
+enableRobotsTXT = true
+# A tool site, not a blog: no posts (so pages render as plain cards), no feeds or taxonomies.
+mainSections = ["posts"]
+disableKinds = ["rss", "taxonomy", "term"]
+
+[minify]
+  minifyOutput = true
+
+[markup]
+  [markup.goldmark.parser]
+    wrapStandAloneImageWithinParagraph = false
+    [markup.goldmark.parser.attribute]
+      block = true
+
+[params]
+  description = "A hobby page for planning Beyond Power VOLTRA I workouts: Tabata and interval timers, and an exercise composer that only picks what your Voltras, handles and anchors allow. Not affiliated with Beyond Power."
+  tagline = "A hobby page for my Voltra training"
+  # Panel lockup: Daniel's logo + the site title (no params.author, so the name shown is the site title).
+  logo = "images/DanielSadaLogo.png"
+  favicon = "favicon.ico"
+  ogimage = "images/og-image.png"
+  crumbroot = "voltra"
+  colorscheme = "auto"
+
+  # Same palette as danielsada.tech (the logo purple).
+  [params.colors]
+    wall = "#3d6fd6"
+    [params.colors.light]
+      accent = "#8a5cd6"
+      ink = "#5e2ca5"
+    [params.colors.dark]
+      accent = "#a77bff"
+      ink = "#c6a8ff"
+
+  [params.panel]
+    width = "17rem"
+
+  [params.rss]
+    panel = false
+
+  [params.post]
+    progress = false
+
+  [params.home]
+    [[params.home.main]]
+      widget = "intro"
+    [[params.home.main]]
+      widget = "quickstart"
+      title = "Start training"
+    [[params.home.side]]
+      widget = "disclaimer"
+      title = "Hobby project"
+
+  # Voltra-specific settings (layouts/_partials/voltra/*, assets/js/*).
+  [params.voltra]
+    official = "https://www.beyond-power.com/"
+    help = "https://help.beyond-power.com/"
+
+[menus]
+  [[menus.main]]
+    name = "Timer"
+    pageRef = "/timer"
+    weight = 10
+    [menus.main.params]
+      icon = "timer"
+  [[menus.main]]
+    name = "Composer"
+    pageRef = "/composer"
+    weight = 20
+    [menus.main.params]
+      icon = "dumbbell"
+  [[menus.main]]
+    name = "Equipment"
+    pageRef = "/equipment"
+    weight = 30
+    [menus.main.params]
+      icon = "anchor"
+
+  [[menus.social]]
+    name = "danielsada.tech"
+    url = "https://danielsada.tech/"
+    weight = 5
+    [menus.social.params]
+      icon = "globe"
+  [[menus.social]]
+    name = "Source on GitHub"
+    url = "https://github.com/danielsada/voltra-exercise-maker"
+    weight = 10
+    [menus.social.params]
+      icon = "github"
+  [[menus.social]]
+    name = "LinkedIn"
+    url = "https://www.linkedin.com/in/danielsadac"
+    weight = 20
+    [menus.social.params]
+      icon = "linkedin"
+  [[menus.social]]
+    name = "X (Twitter)"
+    url = "https://x.com/danielsadac"
+    weight = 30
+    [menus.social.params]
+      icon = "x"

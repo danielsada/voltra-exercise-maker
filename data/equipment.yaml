@@ -1,0 +1,139 @@
+# Beyond Power VOLTRA I equipment, as used by the composer (assets/js/lib/equipment.js).
+# Names follow Beyond Power's store (https://www.beyond-power.com/pages/build-your-bundle).
+# `count`: bool = you have it or not; qty = 0, 1 or 2 (one per Voltra); pair = sold as a pair (counts as 2).
+# `groups`: exercises can ask for a group ("handle", "bar1", "bar2") instead of one specific attachment.
+# `gear`: how the stick figure draws it (handle, ring, strap, rope, bar, harness).
+# Anything we couldn't confirm from an official page is marked in `note`.
+
+attachments:
+  - id: basic-handle
+    name: Basic Handle
+    icon: handle
+    count: qty
+    groups: [handle]
+    gear: handle
+  - id: ring-handle
+    name: Ring Handle
+    icon: ring
+    count: qty
+    groups: [handle]
+    gear: ring
+    note: A rigid handle (wood, steel and rubber).
+  - id: ankle-strap
+    name: Ankle Straps (pair)
+    short: Ankle Strap
+    icon: strap
+    count: pair
+    gear: strap
+  - id: functional-rope
+    name: Functional Rope
+    icon: rope
+    count: bool
+    gear: rope
+  - id: squat-harness
+    name: Squat Harness
+    icon: harness
+    count: bool
+    gear: harness
+    note: A shoulder and ribcage harness for belt-squat-style loading.
+  - id: carbon-bar-premium-grip
+    name: Carbon Bar with Premium Grip
+    icon: bar
+    count: bool
+    groups: [bar1]
+    gear: bar
+    note: 24" or 48". We assume it clips to one cable at its centre; Beyond Power doesn't say.
+  - id: alumacore-bar
+    name: AlumaCore Bar
+    icon: bar
+    count: bool
+    groups: [bar1]
+    gear: bar
+    note: 24". We assume it clips to one cable at its centre.
+  - id: fusioncore-bar
+    name: FusionCore Bar
+    icon: bar
+    count: bool
+    groups: [bar1]
+    gear: bar
+    note: 24", with a swivel. We assume it clips to one cable at its centre.
+  - id: carbon-bar-hooks
+    name: Carbon Bar with Hooks
+    icon: bar
+    count: bool
+    groups: [bar2]
+    gear: bar
+    note: 36" or 52". We assume the end hooks take one Voltra each (two-Voltra bar); Beyond Power doesn't say.
+  - id: darth-sabar
+    name: Darth SaBar
+    icon: bar
+    count: bool
+    groups: [bar1, bar2]
+    gear: bar
+    note: Limited edition. Comes as a centre-hook bar (one Voltra) and a dual-hook bar (two Voltras).
+
+# Group names, for setups that accept any attachment in a group.
+groups:
+  handle: Handle
+  bar1: Single-cable bar
+  bar2: Two-Voltra bar
+
+# Anchor points. `pullup` is a pull-up bar (or any overhead point) you can stand or kneel under;
+# high/mid/low are a post, rack or strap mount at that height. A pull-up bar holds both Voltras.
+anchors:
+  - id: pullup
+    name: Pull-up bar
+    short: Pull-up bar
+    icon: pullup
+    desc: A pull-up bar or overhead point you can stand or kneel under (lat pulldowns).
+    need: a pull-up bar
+    need2: a pull-up bar
+  - id: high
+    name: Overhead height
+    short: Overhead
+    icon: height
+    desc: A post, rack or Strap Mount above your head (pushdowns, face pulls, high-to-low chops).
+    need: an overhead-height anchor
+    need2: two overhead-height anchors side by side
+  - id: mid
+    name: Torso height
+    short: Torso
+    icon: height
+    desc: Chest to waist height (rows, presses, flyes, Pallof presses).
+    need: a torso-height anchor
+    need2: two torso-height anchors side by side
+  - id: low
+    name: Feet height
+    short: Feet
+    icon: height
+    desc: At or near the floor (curls, deadlifts, squats, kickbacks).
+    need: a feet-height anchor
+    need2: two feet-height anchors side by side
+  - id: platform
+    name: Travel Platform
+    short: Platform
+    icon: platform
+    desc: One Voltra mounted on the Travel Platform; you stand on it.
+    need: the Travel Platform
+    need2: the Travel Platform
+
+# Movement patterns and regions (also the library filters and the composer's slots).
+patterns:
+  squat: { name: Squat, region: lower }
+  hinge: { name: Hinge, region: lower }
+  lunge: { name: Lunge, region: lower }
+  glutes: { name: Glutes & hips, region: lower }
+  push-horizontal: { name: Horizontal push, region: upper }
+  push-vertical: { name: Vertical push, region: upper }
+  pull-horizontal: { name: Horizontal pull, region: upper }
+  pull-vertical: { name: Vertical pull, region: upper }
+  shoulders: { name: Shoulders, region: upper }
+  biceps: { name: Biceps, region: upper }
+  triceps: { name: Triceps, region: upper }
+  core: { name: Core, region: core }
+  rotation: { name: Rotation, region: core }
+
+regions:
+  upper: Upper body
+  lower: Lower body
+  core: Core

@@ -1,0 +1,17 @@
+{{- /* Site hook (theme: layouts/_partials/hooks/body-end.html): the disclaimer footer on every page, the page's
+  script (front matter params.script → assets/js/<name>-page.js), and the public exercises.json. */ -}}
+{{- $official := site.Params.voltra.official -}}
+<footer class="vfoot" aria-label="Disclaimer">
+  <p><strong>A hobby project.</strong> Daniel Sada made this to plan his own training. It is not affiliated with,
+  endorsed by or sponsored by Beyond Power. VOLTRA is a trademark of Beyond Power; see
+  <a href="{{ $official }}" rel="noopener">beyond-power.com</a> for official information. Train safely and follow the
+  manufacturer's instructions.</p>
+</footer>
+{{- with .Params.script }}
+{{ partial "voltra/script.html" . }}
+{{- end }}
+{{- if .IsHome }}
+  {{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
+  {{- $json := resources.FromString "exercises.json" (jsonify (dict "equipment" $data.equipment "exercises" $data.exercises)) -}}
+  {{- $json.Publish -}}
+{{- end }}
