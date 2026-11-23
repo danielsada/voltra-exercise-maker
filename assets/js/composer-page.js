@@ -120,9 +120,9 @@ function renderSetupList(li, ex, best) {
     if (ok) n += 1;
     s.classList.toggle('is-best', i === best);
     s.classList.toggle('is-off', !ok);
-    const b = $('.ex__pick', s);
-    b.disabled = !ok;
-    b.setAttribute('aria-pressed', String(i === best));
+    const r = $('input', s);
+    r.disabled = !ok;
+    r.checked = i === best;
   });
   $('.ex__choose', li).hidden = n < 2;
   let need = $('.ex__need', li);
@@ -414,21 +414,21 @@ $('#workclear').addEventListener('click', () => {
   renderWorkout({ index: 0, act: 'swap' });
   say('Workout cleared.');
 });
+$('#exlist').addEventListener('change', (e) => {
+  const r = e.target.closest('.ex__setups input');
+  if (!r) return;
+  const li = r.closest('.ex');
+  const ex = exById.get(li.dataset.id);
+  const i = Number(r.value);
+  if (!available.has(ex.id) || available.get(ex.id) === i || !fits(ex, i)) return;
+  choices[ex.id] = i;
+  store.set('setups', choices);
+  available.set(ex.id, i);
+  renderCard(li);
+  refreshWorkout();
+  say(`${ex.name}: ${describeSetup(ex.setups[i], eq)}.`);
+});
 $('#exlist').addEventListener('click', (e) => {
-  const pick = e.target.closest('.ex__pick');
-  if (pick) {
-    const li = pick.closest('.ex');
-    const ex = exById.get(li.dataset.id);
-    const i = Number(pick.dataset.setup);
-    if (!available.has(ex.id) || available.get(ex.id) === i || !fits(ex, i)) return;
-    choices[ex.id] = i;
-    store.set('setups', choices);
-    available.set(ex.id, i);
-    renderCard(li);
-    refreshWorkout();
-    say(`${ex.name}: ${describeSetup(ex.setups[i], eq)}.`);
-    return;
-  }
   const b = e.target.closest('[data-add]');
   if (!b || !available.has(b.dataset.add)) return;
   const id = b.dataset.add;

@@ -2,8 +2,8 @@
 import * as P from '@params';
 import { Engine } from './lib/engine.js';
 import { TABATA_DEFAULTS, VOLLAARD_DEFAULTS, INTERVAL_DEFAULTS, WORKOUT_DEFAULTS, buildTabata, buildVollaard, buildInterval, buildWorkout, clampConfig, totalSeconds, formatTime } from './lib/timeline.js';
-import { decodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
-import { describeSetup } from './lib/equipment.js';
+import { decodeWorkout, encodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
+import { describeSetup, checkSetup, normalizeProfile } from './lib/equipment.js';
 import { store, $, $$, figureSVG, unilateralOf } from './lib/ui.js';
 
 const eq = P.equipment;
@@ -39,7 +39,7 @@ const saveCfg = () => store.set('timer', { ...cfg, mode });
 // A link's workout stays in the URL (next to #mode=…) so switching modes and reloading keeps it.
 const linkParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const fromLink = decodeWorkout(location.hash, exercises);
-let linkPart = fromLink ? new URLSearchParams({ w: linkParams.get('w'), f: fromLink.format }).toString() : '';
+let linkPart = fromLink ? encodeWorkout(fromLink.items, fromLink.format) : '';
 const savedWork = obj(store.get('workout'));
 const workout = fromLink || { items: normalizeItems(savedWork.items, exercises), format: normalizeFormat(savedWork.format || cfg.workout.format) };
 cfg.workout.format = workout.format;
@@ -216,6 +216,7 @@ function renderExercise(p) {
     $('#exname').textContent = it.name;
     $('#exsetup').textContent = describeSetup(it.setup, eq) + (it.setup.note ? `. ${it.setup.note}` : '');
     $('#excue').textContent = it.ex.cue || '';
+    $('#exchange').hidden = choicesFor(it).length < 2;
   }
   const side = p.side ? SIDE[p.side][0].toUpperCase() + SIDE[p.side].slice(1) : (it.unilateral ? 'Each side' : '');
   $('#exside').textContent = p.kind === 'work' ? side : `Up next${side ? ` · ${side}` : ''}`;
@@ -390,7 +391,7 @@ function readForm() {
     // keep the composer's saved workout in step, so the format sticks next time
     if (fmtChanged && !fromLink) store.set('workout', { ...savedWork, items: workout.items, format: w.format });
     if (fmtChanged && fromLink) {
-      linkPart = new URLSearchParams({ w: linkParams.get('w'), f: w.format }).toString();
+      linkPart = encodeWorkout(workout.items, w.format);
       history.replaceState(null, '', `${location.pathname}#mode=${mode}&${linkPart}`);
     }
     if (!fmtChanged) {
@@ -436,22 +437,82 @@ $('#defaults').addEventListener('click', () => {
 });
 
 // ---------- workout plan ----------
+// Setups you can switch to: the ones your saved equipment allows (any, if you haven't set it up here), plus the one in use.
+const savedProfile = store.get('profile');
+const myProfile = savedProfile ? normalizeProfile(savedProfile, eq) : null;
+const choicesFor = (it) => it.ex.setups.map((s, i) => i).filter((i) => i === it.setupIndex || !myProfile || checkSetup(it.ex.setups[i], myProfile, eq).ok);
+
+function renderPlanItem(li, it, i) {
+  li.querySelector('.wi__fig').innerHTML = figureSVG(it.ex, it.setupIndex, eq, { animate: false });
+  li.querySelector('.wi__name').textContent = `${i + 1}. ${it.name}${it.unilateral ? ' (each side)' : ''}`;
+  const text = li.querySelector('.wi__setup');
+  if (text) text.textContent = describeSetup(it.setup, eq);
+  li.querySelectorAll('.opts input').forEach((r) => { r.checked = Number(r.value) === it.setupIndex; });
+}
+
 function renderPlanList() {
   const list = $('#planlist');
   list.innerHTML = '';
   plan.forEach((it, i) => {
     const li = document.createElement('li');
     li.className = 'wi';
+    li.id = `plan-${i}`;
     li.innerHTML = '<div class="wi__fig" aria-hidden="true"></div><div class="wi__body"><b class="wi__name"></b><small class="wi__setup"></small></div>';
-    li.querySelector('.wi__fig').innerHTML = figureSVG(it.ex, it.setupIndex, eq, { animate: false });
-    li.querySelector('.wi__name').textContent = `${i + 1}. ${it.name}${it.unilateral ? ' (each side)' : ''}`;
-    li.querySelector('.wi__setup').textContent = describeSetup(it.setup, eq);
+    const opts = choicesFor(it);
+    if (opts.length > 1) {
+      // the radios replace the setup line
+      const ul = document.createElement('ul');
+      ul.className = 'opts';
+      ul.setAttribute('role', 'radiogroup');
+      ul.setAttribute('aria-label', `Setup for ${it.name}`);
+      for (const s of opts) {
+        const o = document.createElement('li');
+        o.innerHTML = `<label class="opt"><input type="radio" name="plan-setup-${i}" value="${s}"><span></span></label>`;
+        o.querySelector('span').textContent = describeSetup(it.ex.setups[s], eq);
+        ul.append(o);
+      }
+      li.querySelector('.wi__setup').replaceWith(ul);
+    }
+    renderPlanItem(li, it, i);
     list.append(li);
   });
   $('#planempty').hidden = plan.length > 0;
   if (badLink) $('#planempty').textContent = "This workout link doesn't contain any exercise this site knows. It may be from an older version; compose a new one.";
   $('#planedit').hidden = !plan.length;
 }
+
+// Switching an exercise's setup here also updates the composer's workout (or the link) and its remembered choice.
+$('#planlist').addEventListener('change', (e) => {
+  const r = e.target.closest('.opts input');
+  if (!r) return;
+  const i = Number(r.closest('.wi').id.slice(5));
+  const it = plan[i];
+  const s = Number(r.value);
+  const wasOneSided = it.unilateral;
+  Object.assign(it, { setupIndex: s, setup: it.ex.setups[s], unilateral: unilateralOf(it.ex, it.ex.setups[s]) });
+  workout.items[i].setup = s;
+  if (fromLink) {
+    linkPart = encodeWorkout(workout.items, cfg.workout.format);
+    history.replaceState(null, '', `${location.pathname}#mode=${mode}&${linkPart}`);
+  } else {
+    store.set('workout', { ...obj(store.get('workout')), items: workout.items });
+  }
+  store.set('setups', { ...obj(store.get('setups')), [it.ex.id]: s });
+  renderPlanItem(r.closest('.wi'), it, i);
+  shownItem = null;
+  // one side or both changes the rounds, so the timer is rebuilt; mid-workout that waits until you reset
+  if (wasOneSided !== it.unilateral && pristine()) build();
+  else render();
+  noteFor();
+  $('#announce').textContent = `${it.name}: ${describeSetup(it.setup, eq)}`;
+});
+$('#exchange').addEventListener('click', () => {
+  const li = shownItem !== null && $(`#plan-${shownItem}`);
+  if (!li) return;
+  li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  const r = $('.opts input:checked', li);
+  if (r) r.focus({ preventScroll: true });
+});
 
 // ---------- mode ----------
 function setMode(m, fromUser) {

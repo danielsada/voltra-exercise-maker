@@ -283,8 +283,14 @@ html:not(.js) .ex__fig { display: none; }
 .ex__add.is-on::after { content: "✓"; font-weight: 700; }
 /* Exercises page: each setup is a button that shows its drawing */
 .ex__pick { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.ex__pick:not(:disabled):hover { color: var(--accent-ink); text-decoration: underline; }
-.ex__pick:disabled { cursor: default; }
+.ex__pick:hover { color: var(--accent-ink); text-decoration: underline; }
+/* setups as radio buttons (composer cards, the timer's workout list) */
+.ex__setups--radio li, .opts li { padding-left: 0; }
+.ex__setups--radio li::before, .opts li::before { content: none; }
+.opt { display: flex; align-items: flex-start; gap: 8px; padding: 2px 0; cursor: pointer; }
+.opt input { flex: none; width: 1rem; height: 1rem; margin: .1rem 0 0; accent-color: var(--accent-ink); cursor: inherit; }
+.opt:has(input:disabled) { cursor: default; }
+.opt:has(input:not(:disabled)):hover > span { color: var(--accent-ink); }
 .ex__choose { margin: 2px 0 0; font-size: .75rem; color: var(--muted); }
 .lib--all .exlist { grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); }
 .ex.is-missing { background: var(--card-2); }
@@ -365,6 +371,8 @@ html:not(.js) .diagram__fig { display: none; }
 .tm__exside { margin-top: 2px !important; font-weight: 600; color: var(--ph); }
 .tm__exsetup { margin-top: 8px !important; font-size: .875rem; color: var(--muted); line-height: 1.45; }
 .tm__excue { margin-top: 6px !important; font-size: .9375rem; line-height: 1.45; }
+.tm__exchange { min-height: 1.75rem; margin: 4px 0 0 -8px; padding: 2px 8px; font-size: .8125rem; color: var(--accent-ink); }
+.worklist--plan .opts { margin: 4px 0 0; padding: 0; list-style: none; font-size: .8125rem; line-height: 1.4; }
 .tm__stage[data-phase="work"] .tm__ex { animation: slide-in .4s ease-out; }
 .tm__progress { height: 6px; margin: 18px 0 8px; border-radius: 3px; background: var(--card-2); overflow: hidden; }
 .tm__progress span { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); }

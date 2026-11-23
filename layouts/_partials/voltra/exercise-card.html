@@ -1,6 +1,6 @@
-{{- /* One exercise card. Context: dict "ex" "eq" "mode". Every setup is a button: "library" shows that setup's drawing;
-  "composer" (which also has the add button) uses it for this exercise when your equipment allows it. The figure is
-  drawn by the page script. */ -}}
+{{- /* One exercise card. Context: dict "ex" "eq" "mode". "library": every setup is a button that shows that setup's
+  drawing. "composer" (which also has the add button): the setups are radio buttons; the one you choose is used for this
+  exercise when your equipment allows it. The figure is drawn by the page script. */ -}}
 {{- $ex := .ex -}}
 {{- $eq := .eq -}}
 {{- $pat := index $eq.patterns $ex.pattern -}}
@@ -10,17 +10,17 @@
     <h3 class="ex__name">{{ $ex.name }}{{ if $ex.unilateral }} <span class="tag ex__each">each side</span>{{ end }}</h3>
     <p class="ex__meta">{{ $pat.name }} · {{ delimit $ex.muscles ", " }}</p>
     <div class="ex__setup">
-      <ul class="ex__setups">
+      <ul class="ex__setups{{ if eq .mode "composer" }} ex__setups--radio" role="radiogroup" aria-label="Setup for {{ $ex.name }}{{ end }}">
       {{- range $i, $s := $ex.setups }}
         {{- if eq $.mode "library" }}
         <li{{ if eq $i 0 }} class="is-best"{{ end }}><button type="button" class="ex__pick" data-setup="{{ $i }}"{{ if eq $i 0 }} aria-pressed="true"{{ else }} aria-pressed="false"{{ end }}>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</button></li>
         {{- else }}
-        <li><button type="button" class="ex__pick" data-setup="{{ $i }}" aria-pressed="false">{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</button></li>
+        <li><label class="opt"><input type="radio" name="setup-{{ $ex.id }}" value="{{ $i }}"><span>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</span></label></li>
         {{- end }}
       {{- end }}
       </ul>
       {{- if eq .mode "composer" }}
-      <p class="ex__choose js-only" hidden>You can do this more than one way: tap a setup to use it.</p>
+      <p class="ex__choose js-only" hidden>You can do this more than one way: choose the setup to use.</p>
       {{- end }}
     </div>
     <p class="ex__cue">{{ $ex.cue }}</p>
