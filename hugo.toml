@@ -1,7 +1,7 @@
 # Voltra Exercise Maker: Hugo site config. Theme: themes/hugo-breeze-plasma-inspired-theme (vendored copy, the same
 # theme and settings as danielsada.tech and ninja.danielsada.tech, so the sites look and navigate alike; see README.md).
-# Requires Hugo >= 0.158 (built and deployed with 0.170.1; see README.md > Deploy).
-baseURL = "https://danielsada.github.io/voltra-exercise-maker/"
+# Requires Hugo >= 0.158 (built and deployed with 0.170.1). Deployed by Cloudflare Pages (README.md > Deploy).
+baseURL = "https://voltra.danielsada.tech/"
 title = "Voltra Exercise Maker"
 theme = "hugo-breeze-plasma-inspired-theme"
 locale = "en-US"
@@ -27,7 +27,7 @@ disableKinds = ["taxonomy", "term", "rss"]
   description = "A hobby page for planning Beyond Power VOLTRA I workouts: Tabata and interval timers, and an exercise composer that only picks what your Voltras, handles and anchors allow. Not affiliated with Beyond Power."
   tagline = "Voltra timers & exercise composer"
   logo = "images/DanielSadaLogo.png"
-  favicon = "favicon.ico"   # no leading slash: relative to baseURL, which is a sub-path
+  favicon = "favicon.ico"
   ogimage = "images/og-image.png"
   crumbroot = "Voltra Exercise Maker"
   colorscheme = "auto"

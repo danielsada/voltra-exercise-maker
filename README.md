@@ -4,7 +4,7 @@
 interval timers, and an exercise composer that only suggests what your Voltras, handles and anchor points allow.
 Made with [Hugo](https://gohugo.io/), like [danielsada.tech](https://danielsada.tech).
 
-**Live:** https://danielsada.github.io/voltra-exercise-maker/
+**Live:** https://voltra.danielsada.tech/
 
 > **Disclaimer.** This is a personal hobby project. It is not affiliated with, endorsed by or sponsored by Beyond
 > Power, and VOLTRA is their trademark. Exercise names, cues and drawings are original to this site. Use the
@@ -32,7 +32,7 @@ Requires **Hugo 0.170.1** (any edition; the theme needs ≥ 0.158). Nothing else
 itself (`js.Build`).
 
 ```sh
-hugo server        # http://localhost:1313/voltra-exercise-maker/
+hugo server        # http://localhost:1313/
 hugo               # build into public/
 ```
 
@@ -41,8 +41,19 @@ pattern, duplicate id…).
 
 ## Deploy
 
-GitHub Pages, from `main`, by `.github/workflows/pages.yml` (Settings → Pages → Source: **GitHub Actions**). The
-workflow installs Hugo 0.170.1 and runs `hugo --minify`.
+The site is deployed to **https://voltra.danielsada.tech/** by **Cloudflare Pages** from the `main` branch, the
+same way as danielsada.tech:
+
+| Setting | Value |
+|---|---|
+| Framework preset | Hugo |
+| Build command | `hugo --minify` |
+| Build output directory | `public` |
+| Environment variable (Production and Preview) | `HUGO_VERSION` = `0.170.1` |
+| Custom domain | `voltra.danielsada.tech` |
+
+Keep `HUGO_VERSION` in the Pages settings in sync with the Hugo version you use locally (minimum 0.158). Preview
+deployments build with the production `baseURL`, which is fine for checking a branch.
 
 ## Theme
 
