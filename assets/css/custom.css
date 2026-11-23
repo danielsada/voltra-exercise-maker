@@ -11,6 +11,10 @@
 }
 html:not(.js) .js-only { display: none !important; }
 
+/* ---------- Panel: this site's own sections, below the shared Places (as on ninja.danielsada.tech) ---------- */
+.appnav { padding-top: 10px; border-top: 1px solid var(--line); }
+.appnav--plain { padding-top: 6px; }
+
 /* ---------- footer disclaimer (every page) ---------- */
 .vfoot {
   margin: 0 12px 24px; padding: 12px 16px; border-radius: 12px; font-size: .8125rem; line-height: 1.5;
@@ -97,14 +101,17 @@ html:not(.js) .js-only { display: none !important; }
 @keyframes bob { 50% { transform: translateY(-3px) rotate(-6deg); } }
 
 /* ---------- composer ---------- */
-.vx-grid { display: grid; gap: 20px; align-items: start; }
-@container main (min-width: 900px) { .vx-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } .vx-compose { position: sticky; top: var(--sticky-top); } }
-.eqform { display: flex; flex-direction: column; gap: 18px; }
+.eqform { display: grid; gap: 18px; }
+@container main (min-width: 900px) {
+  .eqform { grid-template-columns: 10rem minmax(0, 1fr); column-gap: 24px; }
+  .eqf--atts { grid-column: 1 / -1; }
+  .eqf--units .seg { display: flex; flex-direction: column; }
+}
 .eqf { margin: 0; padding: 0; border: 0; min-width: 0; }
 .eqf > legend { margin-bottom: 8px; padding: 0; font-size: .8125rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-.eqf > .chk { margin-top: 10px; }
 .anchors { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 @container main (min-width: 560px) { .anchors { grid-template-columns: 1fr 1fr; } }
+@container main (min-width: 1000px) { .anchors { grid-template-columns: 1fr 1fr 1fr; } }
 .anc { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card-2); }
 .anc.is-on { border-color: var(--sel-edge); background: var(--accent-soft); }
 .anc__fig { flex: none; align-self: flex-start; width: 4.75rem; border-radius: 8px; background: var(--card); }
@@ -115,12 +122,13 @@ html:not(.js) .js-only { display: none !important; }
 .eqform:not(.is-two) .two-only { display: none; }
 .atts { display: grid; gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
 @container main (min-width: 560px) { .atts { grid-template-columns: 1fr 1fr; } }
+@container main (min-width: 1000px) { .atts { grid-template-columns: repeat(3, 1fr); } }
 .atts li { display: flex; flex-direction: column; gap: 2px; padding: 4px 0; }
 .qty { display: flex; align-items: center; gap: 6px; }
 .qty .i { color: var(--muted); }
 .qty select { height: 2rem; margin-left: auto; padding: 0 6px; }
 .att__note { margin-left: 1.65rem; color: var(--muted); font-size: .75rem; line-height: 1.4; }
-.eqsum { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-weight: 600; color: var(--accent-ink); }
+.eqsum { grid-column: 1 / -1; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-weight: 600; color: var(--accent-ink); }
 
 .coform { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .coform .fld:first-child { flex: 1 1 9rem; }
@@ -138,13 +146,36 @@ html:not(.js) .js-only { display: none !important; }
 .wi__acts .tool:hover { color: var(--accent-ink); }
 .wi__acts .tool:disabled { visibility: hidden; }
 .wi.is-missing .wi__setup { color: var(--ph-prep); }
-.wi { animation: slide-in .35s ease-out both; }
-.wi:nth-child(2) { animation-delay: .04s; } .wi:nth-child(3) { animation-delay: .08s; } .wi:nth-child(4) { animation-delay: .12s; }
-.wi:nth-child(5) { animation-delay: .16s; } .wi:nth-child(6) { animation-delay: .2s; } .wi:nth-child(n+7) { animation-delay: .24s; }
+/* only what was just added or composed slides in, with a short highlight */
+.wi.is-new { animation: slide-in .35s ease-out both, flash 1.6s ease-out; }
+.wi.is-new:nth-child(2) { animation-delay: .04s, 0s; } .wi.is-new:nth-child(3) { animation-delay: .08s, 0s; } .wi.is-new:nth-child(4) { animation-delay: .12s, 0s; }
+.wi.is-new:nth-child(5) { animation-delay: .16s, 0s; } .wi.is-new:nth-child(6) { animation-delay: .2s, 0s; } .wi.is-new:nth-child(n+7) { animation-delay: .24s, 0s; }
+@keyframes flash { 0%, 30% { background: var(--accent-soft); } 100% { background: transparent; } }
 @keyframes slide-in { from { opacity: 0; transform: translateX(-10px); } }
 .workactions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .worktime { color: var(--muted); font-size: .875rem; }
 .workactions .tool { margin-left: auto; }
+
+/* Workout column (sticky beside the list on wide screens) and the floating bar on narrower ones */
+.cx { display: grid; gap: 20px; align-items: start; }
+@container main (min-width: 880px) {
+  .cx { grid-template-columns: 21rem minmax(0, 1fr); }
+  .cx-work { position: sticky; top: var(--sticky-top); max-height: calc(100vh - var(--sticky-top) * 2); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+}
+.cx-count { margin-left: auto; font-size: .8125rem; font-weight: 600; color: var(--accent-ink); }
+.cx-work .coform .fld:first-child { flex-basis: 100%; }
+.cx-work .wi { grid-template-columns: 3.25rem minmax(0, 1fr) auto; }
+.cx-fab {
+  position: fixed; z-index: 30; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 12px;
+  padding: 8px 8px 8px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--edge); box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); animation: rise .3s ease-out;
+}
+.cx-fab__open { display: flex; flex-direction: column; flex: 1; min-width: 0; color: var(--text); text-decoration: none; line-height: 1.3; }
+.cx-fab__open b { color: var(--accent-ink); }
+.cx-fab__open span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .8125rem; color: var(--muted); }
+@keyframes rise { from { transform: translateY(20px); opacity: 0; } }
+@media (min-width: 1240px) { .cx-fab { display: none !important; } }
+@media (max-width: 1239px) { .vx:has(.cx-fab:not([hidden])) { padding-bottom: 72px; } }
 
 /* Library: the theme's Dolphin window, with a grid of exercise cards in the view */
 .lib .win__bar h2 { margin: 0; font-size: 1.0625rem; font-weight: 700; }
@@ -171,6 +202,13 @@ html:not(.js) .ex__fig { display: none; }
 .ex__cue { margin: 0; font-size: .875rem; line-height: 1.45; }
 .ex__add { align-self: flex-start; min-height: 2rem; margin: 2px 0 0 -10px; font-size: .875rem; }
 .ex__add:disabled { display: none; }
+.ex__add.is-on { margin-left: 0; background: var(--accent-soft); border-color: var(--accent-edge); }
+.ex__add.is-on::after { content: "✓"; }
+.ex.is-added { border-color: var(--sel-edge); box-shadow: inset 3px 0 0 var(--accent); }
+/* Exercises page: each setup is a button that shows its drawing */
+.ex__pick { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ex__pick:hover { color: var(--accent-ink); text-decoration: underline; }
+.lib--all .exlist { grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); }
 .ex.is-missing { background: var(--card-2); }
 .ex.is-missing .ex__fig { opacity: .5; filter: grayscale(1); }
 .ex.is-missing .ex__name { color: var(--muted); }

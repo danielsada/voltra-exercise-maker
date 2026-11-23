@@ -1,4 +1,5 @@
-# Voltra Exercise Maker: Hugo site config. Theme: themes/hugo-breeze-plasma-inspired-theme (vendored copy, see README.md).
+# Voltra Exercise Maker: Hugo site config. Theme: themes/hugo-breeze-plasma-inspired-theme (vendored copy, the same
+# theme and settings as danielsada.tech and ninja.danielsada.tech, so the sites look and navigate alike; see README.md).
 # Requires Hugo >= 0.158 (built and deployed with 0.170.1; see README.md > Deploy).
 baseURL = "https://danielsada.github.io/voltra-exercise-maker/"
 title = "Voltra Exercise Maker"
@@ -6,10 +7,12 @@ theme = "hugo-breeze-plasma-inspired-theme"
 locale = "en-US"
 defaultContentLanguage = "en"
 capitalizeListTitles = false
+# No posts here: without this Hugo picks the root pages as the main section and the theme renders them as blog posts.
+mainSections = ["none"]
+
 enableRobotsTXT = true
-# A tool site, not a blog: no posts (so pages render as plain cards), no feeds or taxonomies.
-mainSections = ["posts"]
-disableKinds = ["rss", "taxonomy", "term"]
+# A tool site, not a blog: no posts, feeds or taxonomies.
+disableKinds = ["taxonomy", "term", "rss"]
 
 [minify]
   minifyOutput = true
@@ -22,15 +25,22 @@ disableKinds = ["rss", "taxonomy", "term"]
 
 [params]
   description = "A hobby page for planning Beyond Power VOLTRA I workouts: Tabata and interval timers, and an exercise composer that only picks what your Voltras, handles and anchors allow. Not affiliated with Beyond Power."
-  tagline = "A hobby page for my Voltra training"
-  # Panel lockup: Daniel's logo + the site title (no params.author, so the name shown is the site title).
+  tagline = "Voltra timers & exercise composer"
   logo = "images/DanielSadaLogo.png"
-  favicon = "favicon.ico"
+  favicon = "favicon.ico"   # no leading slash: relative to baseURL, which is a sub-path
   ogimage = "images/og-image.png"
-  crumbroot = "voltra"
+  crumbroot = "Voltra Exercise Maker"
   colorscheme = "auto"
+  # The main site; linked from Places and the home page.
+  mainsite = "https://danielsada.tech/"
+  repo = "https://github.com/danielsada/voltra-exercise-maker"
+  [params.author]
+    name = "Daniel Sada"
+    email = "hello@danielsada.tech"
+    emaillabel = "hello [at] danielsada.tech"
+    page = "/equipment"
 
-  # Same palette as danielsada.tech (the logo purple).
+  # Same colours as danielsada.tech (logo purple).
   [params.colors]
     wall = "#3d6fd6"
     [params.colors.light]
@@ -42,6 +52,13 @@ disableKinds = ["rss", "taxonomy", "term"]
 
   [params.panel]
     width = "17rem"
+  # This site's own panel sections, below Places: the tools (menus.voltra), then menus.guide without a title
+  # (layouts/_partials/breeze/panel-projects.html), like ninja.danielsada.tech.
+  [[params.panel.sections]]
+    menu = "voltra"
+    title = "Voltra"
+  [[params.panel.sections]]
+    menu = "guide"
 
   [params.rss]
     panel = false
@@ -58,6 +75,9 @@ disableKinds = ["rss", "taxonomy", "term"]
     [[params.home.side]]
       widget = "disclaimer"
       title = "Hobby project"
+    [[params.home.side]]
+      widget = "mainsite"
+      title = "From danielsada.tech"
 
   # Voltra-specific settings (layouts/_partials/voltra/*, assets/js/*).
   [params.voltra]
@@ -65,34 +85,70 @@ disableKinds = ["rss", "taxonomy", "term"]
     help = "https://help.beyond-power.com/"
 
 [menus]
+  # Places: the same entries as danielsada.tech (absolute links), so the sites share one navigation.
   [[menus.main]]
+    name = "All posts"
+    url = "https://danielsada.tech/posts/"
+    weight = 10
+    [menus.main.params]
+      icon = "blog"
+  [[menus.main]]
+    name = "Notas"
+    url = "https://danielsada.tech/notas/"
+    weight = 20
+    [menus.main.params]
+      icon = "notas"
+      badge = "ES"
+      lang = "es"
+  [[menus.main]]
+    name = "Projects"
+    url = "https://danielsada.tech/projects/"
+    weight = 30
+    [menus.main.params]
+      icon = "apps"
+  [[menus.main]]
+    name = "About"
+    url = "https://danielsada.tech/about/"
+    weight = 40
+    [menus.main.params]
+      icon = "user"
+  [[menus.main]]
+    name = "Contact"
+    url = "mailto:hello@danielsada.tech"
+    weight = 50
+    [menus.main.params]
+      icon = "mail"
+
+  # This site's own pages (see params.panel.sections).
+  [[menus.voltra]]
     name = "Timer"
     pageRef = "/timer"
     weight = 10
-    [menus.main.params]
+    [menus.voltra.params]
       icon = "timer"
-  [[menus.main]]
+  [[menus.voltra]]
     name = "Composer"
     pageRef = "/composer"
     weight = 20
-    [menus.main.params]
+    [menus.voltra.params]
       icon = "dumbbell"
-  [[menus.main]]
-    name = "Equipment"
-    pageRef = "/equipment"
+  [[menus.voltra]]
+    name = "Exercises"
+    pageRef = "/exercises"
     weight = 30
-    [menus.main.params]
-      icon = "anchor"
+    [menus.voltra.params]
+      icon = "folder"
+
+  [[menus.guide]]
+    name = "Anchors & attachments"
+    pageRef = "/equipment"
+    weight = 10
+    [menus.guide.params]
+      icon = "info"
 
   [[menus.social]]
-    name = "danielsada.tech"
-    url = "https://danielsada.tech/"
-    weight = 5
-    [menus.social.params]
-      icon = "globe"
-  [[menus.social]]
-    name = "Source on GitHub"
-    url = "https://github.com/danielsada/voltra-exercise-maker"
+    name = "GitHub"
+    url = "https://github.com/danielsada"
     weight = 10
     [menus.social.params]
       icon = "github"

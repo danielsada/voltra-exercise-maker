@@ -1,71 +1,73 @@
-{{- /* Composer page: equipment form, workout composer and the exercise library (a Dolphin-style window).
-  The library is rendered here so it works without JavaScript; assets/js/composer-page.js filters it,
-  draws the figures and composes workouts. */ -}}
+{{- /* Composer page: equipment form, then the workout (a sticky column on the left; a floating bar on phones) next to
+  the exercises that fit (a Dolphin-style window). Every exercise is rendered here so the page works without
+  JavaScript; assets/js/composer-page.js filters by equipment, draws the figures and composes workouts. */ -}}
 {{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
 {{- $eq := $data.equipment -}}
 {{- $timer := site.GetPage "/timer" -}}
+{{- $library := site.GetPage "/exercises" -}}
 <div class="vx">
   <section class="card intro vx-head" aria-labelledby="page-h">
     <p class="kicker">Exercise composer</p>
     <h1 id="page-h">What can you do with your Voltra?</h1>
-    <p>Set your equipment once (it's saved in this browser). The library shows what's possible, with the setup to
-    use, and <b>Compose</b> picks a balanced workout you can run in the <a href="{{ $timer.RelPermalink }}">timer</a>.</p>
+    <p>Set your equipment once (it's saved in this browser). The list below shows what fits, with the setup to use.
+    Add exercises yourself, or let <b>Compose</b> pick a balanced workout, and run it in the
+    <a href="{{ $timer.RelPermalink }}">timer</a>. Every exercise, with no filters, is in the
+    <a href="{{ $library.RelPermalink }}">exercise library</a>.</p>
   </section>
 
-  <div class="vx-grid">
-    <section class="card vx-equip" aria-labelledby="eq-h">
-      <div class="card-h"><h2 id="eq-h">Your equipment</h2><button type="button" class="tool js-only" id="eq-share">{{ partial "breeze/icon.html" "link" }}Copy link</button></div>
-      <form id="eqform" class="eqform" autocomplete="off">
-        <fieldset class="eqf">
-          <legend>Voltras</legend>
-          <div class="seg" role="radiogroup" aria-label="Number of Voltras">
-            <label><input type="radio" name="units" value="1" checked><span>1 Voltra</span></label>
-            <label><input type="radio" name="units" value="2"><span>2 Voltras</span></label>
-          </div>
-          <label class="chk"><input type="checkbox" name="platform"><span>{{ partial "breeze/icon.html" "platform" }}I have the Travel Platform</span></label>
-        </fieldset>
+  <section class="card vx-equip" aria-labelledby="eq-h">
+    <div class="card-h"><h2 id="eq-h">Your equipment</h2><button type="button" class="tool js-only" id="eq-share">{{ partial "breeze/icon.html" "link" }}<span>Copy link</span></button></div>
+    <form id="eqform" class="eqform" autocomplete="off">
+      <fieldset class="eqf eqf--units">
+        <legend>Voltras</legend>
+        <div class="seg" role="radiogroup" aria-label="Number of Voltras">
+          <label><input type="radio" name="units" value="1" checked><span>1 Voltra</span></label>
+          <label><input type="radio" name="units" value="2"><span>2 Voltras</span></label>
+        </div>
+      </fieldset>
 
-        <fieldset class="eqf">
-          <legend>Where can you anchor?</legend>
-          <ul class="anchors">
-          {{- range $eq.anchors }}{{ if ne .id "platform" }}
-            <li class="anc" data-anchor="{{ .id }}">
-              <span class="anc__fig" aria-hidden="true"></span>
-              <span class="anc__txt">
-                <label class="chk"><input type="checkbox" name="anchor-{{ .id }}"><span><b>{{ .name }}</b></span></label>
-                <small>{{ .desc }}</small>
-                {{- if ne .id "pullup" }}
-                <label class="chk chk--sub two-only"><input type="checkbox" name="two-{{ .id }}"><span>Room for both Voltras side by side</span></label>
-                {{- end }}
-              </span>
-            </li>
-          {{- end }}{{ end }}
-          </ul>
-        </fieldset>
-
-        <fieldset class="eqf">
-          <legend>Handles &amp; attachments</legend>
-          <ul class="atts">
-          {{- range $eq.attachments }}
-            <li>
-              {{- if eq .count "qty" }}
-              <label class="qty">{{ partial "breeze/icon.html" .icon }}<span>{{ .name }}</span>
-                <select name="att-{{ .id }}" aria-label="How many {{ .name }}s"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
-              </label>
-              {{- else }}
-              <label class="chk"><input type="checkbox" name="att-{{ .id }}"><span>{{ partial "breeze/icon.html" .icon }}{{ .name }}</span></label>
+      <fieldset class="eqf eqf--anchors">
+        <legend>Where can you anchor?</legend>
+        <ul class="anchors">
+        {{- range $eq.anchors }}
+          <li class="anc" data-anchor="{{ .id }}">
+            <span class="anc__fig" aria-hidden="true"></span>
+            <span class="anc__txt">
+              <label class="chk"><input type="checkbox" name="{{ cond (eq .id "platform") "platform" (printf "anchor-%s" .id) }}"><span><b>{{ .name }}</b></span></label>
+              <small>{{ .desc }}</small>
+              {{- if not (in (slice "pullup" "platform") .id) }}
+              <label class="chk chk--sub two-only"><input type="checkbox" name="two-{{ .id }}"><span>Room for both Voltras side by side</span></label>
               {{- end }}
-              {{- with .note }}<small class="att__note">{{ . }}</small>{{ end }}
-            </li>
-          {{- end }}
-          </ul>
-        </fieldset>
-      </form>
-      <p class="eqsum" id="eqsum" aria-live="polite"></p>
-    </section>
+            </span>
+          </li>
+        {{- end }}
+        </ul>
+      </fieldset>
 
-    <section class="card vx-compose js-only" aria-labelledby="co-h">
-      <div class="card-h"><h2 id="co-h">Compose a workout</h2></div>
+      <fieldset class="eqf eqf--atts">
+        <legend>Handles &amp; attachments</legend>
+        <ul class="atts">
+        {{- range $eq.attachments }}
+          <li>
+            {{- if eq .count "qty" }}
+            <label class="qty">{{ partial "breeze/icon.html" .icon }}<span>{{ .name }}</span>
+              <select name="att-{{ .id }}" aria-label="How many {{ .name }}s"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
+            </label>
+            {{- else }}
+            <label class="chk"><input type="checkbox" name="att-{{ .id }}"><span>{{ partial "breeze/icon.html" .icon }}{{ .name }}</span></label>
+            {{- end }}
+            {{- with .note }}<small class="att__note">{{ . }}</small>{{ end }}
+          </li>
+        {{- end }}
+        </ul>
+        <p class="eqsum" id="eqsum" aria-live="polite"></p>
+      </fieldset>
+    </form>
+  </section>
+
+  <div class="cx">
+    <aside class="card cx-work js-only" id="workout" aria-labelledby="co-h">
+      <div class="card-h"><h2 id="co-h">Your workout</h2><span class="cx-count" id="workcount"></span></div>
       <form id="coform" class="coform">
         <label class="fld"><span>Focus</span>
           <select name="focus">
@@ -89,75 +91,64 @@
         <button type="submit" class="btn btn--accent">{{ partial "breeze/icon.html" "refresh" }}<span>Compose</span></button>
       </form>
       <ol class="worklist" id="worklist" aria-live="polite"></ol>
-      <p class="worklist__empty" id="workempty">Press <b>Compose</b>, or add exercises from the library below.</p>
+      <p class="worklist__empty" id="workempty">Press <b>Compose</b>, or add exercises from the list.</p>
       <div class="workactions" id="workactions" hidden>
         <a class="btn btn--accent" id="workstart" href="{{ $timer.RelPermalink }}">{{ partial "breeze/icon.html" "play" }}<span>Start in timer</span></a>
         <span class="worktime" id="worktime"></span>
         <button type="button" class="tool" id="workclear">Clear</button>
       </div>
-    </section>
+    </aside>
+
+    <div class="win lib" id="library">
+      <div class="win__bar">
+        {{ partial "breeze/icon.html" "dumbbell" }}
+        <h2 id="lib-h">Exercises that fit</h2>
+        <p class="win__sub" id="libsub">{{ len $data.exercises }} exercises</p>
+      </div>
+      <div class="win__loc">
+        <label class="show-sel"><span>Show</span>
+          <select id="libsel" aria-label="Show">
+            <option value="all">All</option>
+            {{- range $k := slice "upper" "lower" "core" }}<option value="region:{{ $k }}">{{ index $eq.regions $k }}</option>{{ end }}
+            {{- range $k, $v := $eq.patterns }}<option value="pattern:{{ $k }}">{{ $v.name }}</option>{{ end }}
+          </select>
+        </label>
+        <label class="search">{{ partial "breeze/icon.html" "search" }}<input type="search" id="libq" placeholder="Filter by name or muscle" aria-label="Filter exercises"></label>
+        <label class="chk js-only"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
+      </div>
+      <div class="fm">
+        <nav class="show" aria-label="Filter the list">
+          <div class="show__in">
+            <h3 class="ph">Show</h3>
+            <ul>
+              <li><a href="#library" data-filter="all" aria-current="true">{{ partial "breeze/icon.html" "apps" }}All<span class="n" data-n="all"></span></a></li>
+              {{- range $k := slice "upper" "lower" "core" }}
+              <li><a href="#library" data-filter="region:{{ $k }}">{{ partial "breeze/icon.html" "folder" }}{{ index $eq.regions $k }}<span class="n" data-n="region:{{ $k }}"></span></a></li>
+              {{- end }}
+            </ul>
+            <h3 class="ph">Movement</h3>
+            <ul class="tagl">
+              {{- range $k, $v := $eq.patterns }}
+              <li><a href="#library" data-filter="pattern:{{ $k }}">{{ partial "breeze/icon.html" "tag" }}{{ $v.name }}<span class="n" data-n="pattern:{{ $k }}"></span></a></li>
+              {{- end }}
+            </ul>
+          </div>
+        </nav>
+        <div class="view">
+          <ul class="exlist" id="exlist">
+          {{- range $data.exercises }}
+            {{ partial "voltra/exercise-card.html" (dict "ex" . "eq" $eq "mode" "composer") }}
+          {{- end }}
+          </ul>
+          <p class="empty" id="libempty" hidden>Nothing matches. Try another filter, or tick “Include ones I can't do yet”.</p>
+        </div>
+      </div>
+      <div class="win__status"><span id="libstatus" role="status">{{ len $data.exercises }} exercises</span><button type="button" class="tool r js-only" id="libclear" hidden>Clear filter</button></div>
+    </div>
   </div>
 
-  <div class="win lib" id="library">
-    <div class="win__bar">
-      {{ partial "breeze/icon.html" "dumbbell" }}
-      <h2 id="lib-h">Exercise library</h2>
-      <p class="win__sub" id="libsub">{{ len $data.exercises }} exercises</p>
-    </div>
-    <div class="win__loc">
-      <label class="show-sel"><span>Show</span>
-        <select id="libsel" aria-label="Show">
-          <option value="all">All</option>
-          {{- range $k := slice "upper" "lower" "core" }}<option value="region:{{ $k }}">{{ index $eq.regions $k }}</option>{{ end }}
-          {{- range $k, $v := $eq.patterns }}<option value="pattern:{{ $k }}">{{ $v.name }}</option>{{ end }}
-        </select>
-      </label>
-      <label class="search">{{ partial "breeze/icon.html" "search" }}<input type="search" id="libq" placeholder="Filter by name or muscle" aria-label="Filter exercises"></label>
-      <label class="chk js-only"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
-    </div>
-    <div class="fm">
-      <nav class="show" aria-label="Filter the library">
-        <div class="show__in">
-          <h3 class="ph">Show</h3>
-          <ul>
-            <li><a href="#library" data-filter="all" aria-current="true">{{ partial "breeze/icon.html" "apps" }}All<span class="n" data-n="all"></span></a></li>
-            {{- range $k := slice "upper" "lower" "core" }}
-            <li><a href="#library" data-filter="region:{{ $k }}">{{ partial "breeze/icon.html" "folder" }}{{ index $eq.regions $k }}<span class="n" data-n="region:{{ $k }}"></span></a></li>
-            {{- end }}
-          </ul>
-          <h3 class="ph">Movement</h3>
-          <ul class="tagl">
-            {{- range $k, $v := $eq.patterns }}
-            <li><a href="#library" data-filter="pattern:{{ $k }}">{{ partial "breeze/icon.html" "tag" }}{{ $v.name }}<span class="n" data-n="pattern:{{ $k }}"></span></a></li>
-            {{- end }}
-          </ul>
-        </div>
-      </nav>
-      <div class="view">
-        <ul class="exlist" id="exlist">
-        {{- range $data.exercises }}
-          {{- $pat := index $eq.patterns .pattern }}
-          <li class="ex" id="ex-{{ .id }}" data-id="{{ .id }}" data-pattern="{{ .pattern }}" data-region="{{ .region }}" data-q="{{ lower (printf "%s %s %s" .name (delimit .muscles " ") $pat.name) }}">
-            <div class="ex__fig" aria-hidden="true"></div>
-            <div class="ex__body">
-              <h3 class="ex__name">{{ .name }}{{ if .unilateral }} <span class="tag">each side</span>{{ end }}</h3>
-              <p class="ex__meta">{{ $pat.name }} · {{ delimit .muscles ", " }}</p>
-              <div class="ex__setup">
-                <ul class="ex__setups">
-                {{- range .setups }}
-                  <li>{{ partial "voltra/setup-text.html" (dict "setup" . "eq" $eq) }}</li>
-                {{- end }}
-                </ul>
-              </div>
-              <p class="ex__cue">{{ .cue }}</p>
-              <button type="button" class="tool ex__add js-only" data-add="{{ .id }}">{{ partial "breeze/icon.html" "dumbbell" }}Add to workout</button>
-            </div>
-          </li>
-        {{- end }}
-        </ul>
-        <p class="empty" id="libempty" hidden>Nothing matches. Try another filter, or tick “Include ones I can't do yet”.</p>
-      </div>
-    </div>
-    <div class="win__status"><span id="libstatus" role="status">{{ len $data.exercises }} exercises</span><button type="button" class="tool r js-only" id="libclear" hidden>Clear filter</button></div>
+  <div class="cx-fab js-only" id="workfab" hidden>
+    <a class="cx-fab__open" href="#workout"><b id="fabcount"></b><span id="fabnames"></span></a>
+    <a class="btn btn--accent" id="fabstart" href="{{ $timer.RelPermalink }}">{{ partial "breeze/icon.html" "play" }}<span>Start</span></a>
   </div>
 </div>

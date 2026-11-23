@@ -1,0 +1,27 @@
+{{- /* One exercise card. Context: dict "ex" "eq" "mode" ("composer": add button, setups as a list; "library": every
+  setup is a button that shows that setup's drawing). The figure is drawn by the page script. */ -}}
+{{- $ex := .ex -}}
+{{- $eq := .eq -}}
+{{- $pat := index $eq.patterns $ex.pattern -}}
+<li class="ex" id="ex-{{ $ex.id }}" data-id="{{ $ex.id }}" data-pattern="{{ $ex.pattern }}" data-region="{{ $ex.region }}" data-q="{{ lower (printf "%s %s %s" $ex.name (delimit $ex.muscles " ") $pat.name) }}">
+  <div class="ex__fig" aria-hidden="true"></div>
+  <div class="ex__body">
+    <h3 class="ex__name">{{ $ex.name }}{{ if $ex.unilateral }} <span class="tag">each side</span>{{ end }}</h3>
+    <p class="ex__meta">{{ $pat.name }} · {{ delimit $ex.muscles ", " }}</p>
+    <div class="ex__setup">
+      <ul class="ex__setups">
+      {{- range $i, $s := $ex.setups }}
+        {{- if eq $.mode "library" }}
+        <li{{ if eq $i 0 }} class="is-best"{{ end }}><button type="button" class="ex__pick" data-setup="{{ $i }}"{{ if eq $i 0 }} aria-pressed="true"{{ else }} aria-pressed="false"{{ end }}>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</button></li>
+        {{- else }}
+        <li>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</li>
+        {{- end }}
+      {{- end }}
+      </ul>
+    </div>
+    <p class="ex__cue">{{ $ex.cue }}</p>
+    {{- if eq .mode "composer" }}
+    <button type="button" class="tool ex__add js-only" data-add="{{ $ex.id }}" aria-pressed="false">{{ partial "breeze/icon.html" "dumbbell" }}<span>Add to workout</span></button>
+    {{- end }}
+  </div>
+</li>

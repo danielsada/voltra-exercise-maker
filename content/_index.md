@@ -9,6 +9,8 @@ params:
       text: Compose a workout
     - ref: /timer
       text: Open the timer
+    - ref: /exercises
+      text: All exercises
     - ref: /equipment
       text: Anchors & attachments
 ---

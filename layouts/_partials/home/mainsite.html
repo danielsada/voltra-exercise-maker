@@ -1,0 +1,16 @@
+{{- /* Home: the way back to the main site (params.mainsite), with its posts and projects. cfg: title. */ -}}
+{{- $cfg := .cfg -}}
+{{- with site.Params.mainsite }}
+<section class="card" aria-labelledby="main-h">
+  <div class="card-h"><h2 id="main-h">{{ $cfg.title | default "danielsada.tech" }}</h2></div>
+  <p>This site is a side project of {{ with site.Params.author.name }}{{ . }}{{ end }}. I write about developer productivity, engineering culture and the software that saves me time.</p>
+  <ul class="golinks">
+    <li><a class="go" href="{{ . }}">{{ partial "breeze/icon.html" "globe" }}danielsada.tech</a></li>
+    <li><a class="go" href="{{ . }}posts/">{{ partial "breeze/icon.html" "blog" }}All posts</a></li>
+    <li><a class="go" href="{{ . }}projects/">{{ partial "breeze/icon.html" "apps" }}Projects</a></li>
+    {{- with site.Params.repo }}
+    <li><a class="go" href="{{ . }}">{{ partial "breeze/icon.html" "github" }}Source</a></li>
+    {{- end }}
+  </ul>
+</section>
+{{- end }}

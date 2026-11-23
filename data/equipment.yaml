@@ -36,20 +36,14 @@ attachments:
     count: bool
     gear: harness
     note: A shoulder and ribcage harness for belt-squat-style loading.
-  - id: carbon-bar-premium-grip
-    name: Carbon Bar with Premium Grip
+  - id: single-bar
+    name: Bar (Carbon, AlumaCore or FusionCore)
+    short: Bar
     icon: bar
     count: bool
     groups: [bar1]
     gear: bar
-    note: 24" or 48". We assume it clips to one cable at its centre; Beyond Power doesn't say.
-  - id: alumacore-fusioncore
-    name: AlumaCore / FusionCore Bar
-    icon: bar
-    count: bool
-    groups: [bar1]
-    gear: bar
-    note: Either 24" bar. We assume it clips to one cable at its centre.
+    note: Any 24" single-cable bar, clipped to one Voltra at its centre.
   - id: carbon-bar-hooks
     name: Carbon Bar with Hooks
     icon: bar
@@ -61,7 +55,7 @@ attachments:
 # Group names, for setups that accept any attachment in a group.
 groups:
   handle: Handle
-  bar1: Single-cable bar
+  bar1: Bar
   bar2: Two-Voltra bar
 
 # Anchor points. `pullup` is a pull-up bar (or any overhead point) you can stand or kneel under;
@@ -99,7 +93,7 @@ anchors:
     name: Travel Platform
     short: Platform
     icon: platform
-    desc: One Voltra mounted on the Travel Platform; you stand on it.
+    desc: Directly below you. One Voltra mounted on the Travel Platform, and you stand on it.
     need: the Travel Platform
     need2: the Travel Platform
 

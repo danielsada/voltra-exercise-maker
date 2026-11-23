@@ -1,0 +1,30 @@
+{{- /* Exercise library: every exercise and every setup, grouped by body region, no filters.
+  assets/js/exercises-page.js draws the figures; pick a setup to see its drawing. */ -}}
+{{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
+{{- $eq := $data.equipment -}}
+{{- $composer := site.GetPage "/composer" -}}
+<div class="vx">
+  <section class="card intro vx-head" aria-labelledby="page-h">
+    <p class="kicker">Exercise library</p>
+    <h1 id="page-h">Every exercise</h1>
+    <p>All {{ len $data.exercises }} exercises and every way to set them up. Tap a setup to see it drawn. To see only
+    what your Voltras, handles and anchors allow, and build a workout, use the <a href="{{ $composer.RelPermalink }}">composer</a>.</p>
+  </section>
+  {{- range $r := slice "upper" "lower" "core" }}
+  {{- $list := where $data.exercises "region" $r }}
+  {{- with $list }}
+  <section class="win lib lib--all" aria-labelledby="lib-{{ $r }}">
+    <div class="win__bar">
+      {{ partial "breeze/icon.html" "dumbbell" }}
+      <h2 id="lib-{{ $r }}">{{ index $eq.regions $r }}</h2>
+      <p class="win__sub">{{ len . }} exercises</p>
+    </div>
+    <ul class="exlist">
+    {{- range . }}
+      {{ partial "voltra/exercise-card.html" (dict "ex" . "eq" $eq "mode" "library") }}
+    {{- end }}
+    </ul>
+  </section>
+  {{- end }}
+  {{- end }}
+</div>

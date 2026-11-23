@@ -48,7 +48,7 @@ Voltra comes with a carabiner but no handle or mount
 | Ankle Straps | Sold as a pair. Used for kickbacks, leg curls, abduction and knee drives. |
 | Functional Rope | Pushdowns, face pulls, hammer curls, crunches and pull-throughs. |
 | Squat Harness | A shoulder and ribcage harness ([product page](https://www.beyond-power.com/products/squat-harness)), used for harness squats on the platform. |
-| Carbon Bar with Premium Grip, AlumaCore / FusionCore Bar | Treated as **single-cable bars** (one Voltra, centre hook). AlumaCore and FusionCore count as one choice, since either 24" bar does the same jobs here. *How these bars attach isn't confirmed by Beyond Power.* |
+| Carbon Bar with Premium Grip, AlumaCore Bar, FusionCore Bar | One choice, **Bar**: any 24" bar clipped to one Voltra at its centre. They do the same jobs here, so the composer doesn't tell them apart. *How these bars attach isn't confirmed by Beyond Power.* |
 | Carbon Bar with Hooks | The **two-Voltra bar**: a hook at each end, one Voltra per hook (deadlifts, squats, rows, presses with both units). |
 
 The Darth SaBar, Rotator Add-on, Heavy-Duty Resistance Cord, Premium Carabiner and Carbon Mobility Stick aren't used

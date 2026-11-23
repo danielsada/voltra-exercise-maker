@@ -55,7 +55,8 @@ function syncFormState() {
     const a = li.dataset.anchor;
     const units = two && (a === 'pullup' || profile.anchors[a] > 1) ? 2 : 1;
     mountFigure($('.anc__fig', li), anchorDemo(a, units, exercises, eq));
-    li.classList.toggle('is-on', a === 'pullup' ? profile.anchors.pullup : profile.anchors[a] > 0);
+    const on = a === 'platform' ? profile.platform : a === 'pullup' ? profile.anchors.pullup : profile.anchors[a] > 0;
+    li.classList.toggle('is-on', on);
   });
 }
 
@@ -181,6 +182,8 @@ function refreshWorkout() {
   renderWorkout();
 }
 
+let fresh = new Set(); // ids to animate in on the next render (just added or composed)
+
 function renderWorkout() {
   const list = $('#worklist');
   list.innerHTML = '';
@@ -189,7 +192,7 @@ function renderWorkout() {
     const setup = ex.setups[it.setup] || ex.setups[0];
     const ok = available.has(it.id);
     const li = document.createElement('li');
-    li.className = `wi${ok ? '' : ' is-missing'}`;
+    li.className = `wi${ok ? '' : ' is-missing'}${fresh.has(it.id) ? ' is-new' : ''}`;
     li.innerHTML = '<div class="wi__fig" aria-hidden="true"></div><div class="wi__body"><b class="wi__name"></b><small class="wi__setup"></small></div>'
       + `<div class="wi__acts"><button type="button" class="tool" data-act="swap" title="Swap for a similar exercise"><svg class="i" aria-hidden="true"><use href="${sprite}#swap"/></svg><span class="sr-only">Swap</span></button>`
       + '<button type="button" class="tool" data-act="up" title="Move up" aria-label="Move up">↑</button>'
@@ -203,18 +206,38 @@ function renderWorkout() {
       if (!b) return;
       if (b.dataset.act === 'remove') work.items.splice(i, 1);
       if (b.dataset.act === 'up' && i > 0) [work.items[i - 1], work.items[i]] = [work.items[i], work.items[i - 1]];
-      if (b.dataset.act === 'swap') work.items = swap(work.items, i, exercises, available, newSeed());
+      if (b.dataset.act === 'swap') {
+        work.items = swap(work.items, i, exercises, available, newSeed());
+        fresh = new Set([work.items[i].id]);
+      }
       saveWork();
       renderWorkout();
     });
     list.append(li);
   });
+  fresh = new Set();
   const has = work.items.length > 0;
+  const n = work.items.length;
+  const label = `${n} exercise${n === 1 ? '' : 's'}`;
   $('#workempty').hidden = has;
   $('#workactions').hidden = !has;
+  $('#workcount').textContent = has ? label : '';
+  // "Add to workout" buttons show what's already in
+  const inWork = new Set(work.items.map((it) => it.id));
+  $$('.ex__add').forEach((b) => {
+    const on = inWork.has(b.dataset.add);
+    b.setAttribute('aria-pressed', String(on));
+    b.classList.toggle('is-on', on);
+    b.querySelector('span').textContent = on ? 'Added' : 'Add to workout';
+    b.closest('.ex').classList.toggle('is-added', on);
+  });
+  $('#workfab').hidden = !has;
   if (has) {
     const start = $('#workstart');
     start.href = `${start.href.split('#')[0]}#${encodeWorkout(work.items, work.format)}`;
+    $('#fabstart').href = start.href;
+    $('#fabcount').textContent = label;
+    $('#fabnames').textContent = work.items.map((it) => exById.get(it.id).name).join(' · ');
     const timer = store.get('timer') || {};
     const phases = buildWorkout(work.items.map((it) => {
       const ex = exById.get(it.id);
@@ -235,6 +258,7 @@ coform.addEventListener('submit', (e) => {
   coform.elements.count.value = String(work.count);
   work.format = coform.elements.format.value;
   work.items = compose(exercises, available, { focus: work.focus, count: work.count, seed: newSeed() });
+  fresh = new Set(work.items.map((it) => it.id));
   saveWork();
   renderWorkout();
   if (!work.items.length) $('#workempty').textContent = 'Nothing fits your equipment yet. Add an anchor point or a handle above.';
@@ -254,10 +278,18 @@ $('#workclear').addEventListener('click', () => {
 $('#exlist').addEventListener('click', (e) => {
   const b = e.target.closest('[data-add]');
   if (!b || !available.has(b.dataset.add)) return;
-  if (!work.items.some((i) => i.id === b.dataset.add)) work.items.push({ id: b.dataset.add, setup: available.get(b.dataset.add) });
+  const id = b.dataset.add;
+  const at = work.items.findIndex((i) => i.id === id);
+  if (at >= 0) {
+    work.items.splice(at, 1);
+  } else {
+    work.items.push({ id, setup: available.get(id) });
+    fresh = new Set([id]);
+  }
   saveWork();
   renderWorkout();
-  $('.vx-compose').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  const added = $('#worklist .is-new');
+  if (added) added.scrollIntoView({ block: 'nearest' });
 });
 
 writeForm();
