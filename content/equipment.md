@@ -1,5 +1,7 @@
 ---
-title: Anchors & attachments
+title: "Voltra anchors, attachments & Travel Platform"
+linkTitle: Anchors & attachments
+keywords: [Voltra anchors, Voltra attachments, VOLTRA I Travel Platform, Voltra Twin Mode, Strap Mount, Carbon Bar with Hooks]
 description: "How the composer models the VOLTRA I: anchor points, the Travel Platform, handles and bars, and two Voltras, with sources and what isn't confirmed."
 params:
   script: equipment

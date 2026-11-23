@@ -11,16 +11,27 @@
 {{- range site.Menus.social }}{{ if and (strings.HasPrefix .URL "http") (ne (urls.Parse .URL).Host $mainHost) }}{{ $sameAs = $sameAs | append .URL }}{{ end }}{{ end -}}
 {{- $person := dict "@type" "Person" "@id" (print $main "#person") "name" ($author.name | default site.Title) "url" $main -}}
 {{- with $sameAs }}{{ $person = merge $person (dict "sameAs" .) }}{{ end -}}
-{{- $website := dict "@type" "WebSite" "@id" (print site.Home.Permalink "#website") "url" site.Home.Permalink "name" site.Title "description" site.Params.description "inLanguage" site.Language.Locale "author" (dict "@id" (print $main "#person")) -}}
+{{- /* What the site is about: the trainer it's for (named for the reader; the site isn't Beyond Power's). */ -}}
+{{- $product := dict "@type" "Product" "name" "Beyond Power VOLTRA I" "brand" (dict "@type" "Brand" "name" "Beyond Power") -}}
+{{- $website := dict "@type" "WebSite" "about" $product "@id" (print site.Home.Permalink "#website") "url" site.Home.Permalink "name" site.Title "description" site.Params.description "inLanguage" site.Language.Locale "author" (dict "@id" (print $main "#person")) -}}
 {{- $graph := slice -}}
 {{- if .IsHome -}}
   {{- $graph = $graph | append $website $person -}}
 {{- else -}}
-  {{- $graph = $graph | append (dict "@type" "WebPage" "@id" .Permalink "url" .Permalink "name" .Title "description" (.Description | default site.Params.description) "inLanguage" site.Language.Locale "isPartOf" (dict "@id" (print site.Home.Permalink "#website")) "author" $person) -}}
+  {{- $graph = $graph | append (dict "@type" "WebPage" "@id" .Permalink "url" .Permalink "name" .Title "description" (.Description | default site.Params.description) "inLanguage" site.Language.Locale "isPartOf" (dict "@id" (print site.Home.Permalink "#website")) "about" $product "author" $person) -}}
+  {{- if eq .Params.view "exercises" -}}
+    {{- $list := slice -}}
+    {{- range $i, $e := (partialCached "voltra/data.html" . "voltra-data").exercises }}{{ $list = $list | append (dict "@type" "ListItem" "position" (add $i 1) "name" $e.name "url" (print $.Permalink "#ex-" $e.id)) }}{{ end -}}
+    {{- $graph = $graph | append (dict "@type" "ItemList" "name" .Title "numberOfItems" (len $list) "itemListElement" $list) -}}
+  {{- end -}}
   {{- $items := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.Home.Permalink) -}}
   {{- range .Ancestors.Reverse }}{{ if not .IsHome }}{{ $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .LinkTitle "item" .Permalink) }}{{ end }}{{ end -}}
   {{- $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .LinkTitle "item" .Permalink) -}}
   {{- $graph = $graph | append (dict "@type" "BreadcrumbList" "itemListElement" $items) -}}
+{{- end }}
+{{- /* The composer (home) and the timer are web apps: free, in the browser, installable. */ -}}
+{{- if .Params.app -}}
+  {{- $graph = $graph | append (dict "@type" "WebApplication" "name" (cond .IsHome (print site.Title " composer") .Title) "url" .Permalink "description" (.Description | default site.Params.description) "applicationCategory" "SportsApplication" "operatingSystem" "Any (web browser)" "browserRequirements" "Requires JavaScript" "isAccessibleForFree" true "offers" (dict "@type" "Offer" "price" "0" "priceCurrency" "USD") "about" $product "author" (dict "@id" (print $main "#person"))) -}}
 {{- end }}
 <script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" $graph | jsonify | safeJS }}</script>
 {{- with .Params.keywords | default site.Params.keywords }}

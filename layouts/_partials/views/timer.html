@@ -4,7 +4,7 @@
 <div class="vx vx-timer">
   <section class="card tm" aria-labelledby="page-h" id="timer">
     <div class="tm__head">
-      <h1 id="page-h">Timer</h1>
+      <h1 id="page-h">Voltra timer</h1>
       <div class="seg seg--tabs js-only" role="radiogroup" aria-label="Timer mode">
         <label><input type="radio" name="mode" value="tabata" checked><span>Tabata</span></label>
         <label><input type="radio" name="mode" value="interval"><span>Interval</span></label>
@@ -91,4 +91,10 @@
     <ol class="worklist worklist--plan" id="planlist"></ol>
     <p class="worklist__empty" id="planempty">No workout yet. <a href="{{ $composer.RelPermalink }}">Compose one</a> and press <b>Start in timer</b>.</p>
   </section>
+  {{- with .Content }}
+  <section class="card page tm-about" aria-labelledby="about-h">
+    <h2 id="about-h">About this timer</h2>
+    {{ . }}
+  </section>
+  {{- end }}
 </div>

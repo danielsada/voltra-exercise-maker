@@ -354,6 +354,8 @@ html:not(.js) .diagram__fig { display: none; }
 .fld--wide { grid-column: 1 / -1; }
 .setnote { margin: 12px 0 0; color: var(--muted); font-size: .875rem; }
 .worklist--plan { margin-top: 0; }
+.tm-about { max-width: none; margin: 0; padding: 22px 26px 24px; }
+.tm-about h2 { margin-top: 0; }
 .worklist--plan .wi { grid-template-columns: 3.25rem minmax(0, 1fr); }
 .worklist--plan .wi.is-current { margin: 0 -10px; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--sel-edge); }
 .worklist--plan .wi.is-done { opacity: .55; }
