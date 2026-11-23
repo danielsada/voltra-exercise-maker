@@ -107,13 +107,15 @@
       <label class="show-sel"><span>Show</span>
         <select id="libsel" aria-label="Show">
           <option value="all">All</option>
-          <option value="chosen" class="js-only">In my workout</option>
           {{- range $k := slice "upper" "lower" "core" }}<option value="region:{{ $k }}">{{ index $eq.regions $k }}</option>{{ end }}
           {{- range $k, $v := $eq.patterns }}<option value="pattern:{{ $k }}">{{ $v.name }}</option>{{ end }}
         </select>
       </label>
       <label class="search">{{ partial "breeze/icon.html" "search" }}<input type="search" id="libq" placeholder="Filter by name or muscle" aria-label="Filter exercises"></label>
-      <label class="chk js-only"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
+      <div class="toggles js-only">
+        <label class="toggle"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
+        <label class="toggle"><input type="checkbox" id="libchosen"><span>Filter by selected<b class="toggle__n" data-n="chosen">0</b></span></label>
+      </div>
     </div>
     <div class="fm">
       <nav class="show" aria-label="Filter the list">
@@ -121,7 +123,6 @@
           <h3 class="ph">Show</h3>
           <ul>
             <li><a href="#library" data-filter="all" aria-current="true">{{ partial "breeze/icon.html" "apps" }}All<span class="n" data-n="all"></span></a></li>
-            <li class="js-only"><a href="#library" data-filter="chosen">{{ partial "breeze/icon.html" "dumbbell" }}In my workout<span class="n" data-n="chosen"></span></a></li>
             {{- range $k := slice "upper" "lower" "core" }}
             <li><a href="#library" data-filter="region:{{ $k }}">{{ partial "breeze/icon.html" "folder" }}{{ index $eq.regions $k }}<span class="n" data-n="region:{{ $k }}"></span></a></li>
             {{- end }}

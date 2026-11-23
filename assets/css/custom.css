@@ -244,7 +244,28 @@ html:not(.js) .js-only { display: none !important; }
 
 /* Library: the theme's Dolphin window, with a grid of exercise cards in the view */
 .lib .win__bar h2 { margin: 0; font-size: 1.0625rem; font-weight: 700; }
-.lib .win__loc .chk { font-size: .875rem; }
+/* library toggles: pill-shaped checkboxes, big enough to tap */
+.toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.toggle { position: relative; display: inline-flex; }
+.toggle input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.toggle > span {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 16px 6px 12px; border-radius: 999px;
+  border: 1px solid var(--field, var(--line)); background: var(--card); font-size: .875rem; font-weight: 600; color: var(--text);
+  transition: background-color .15s, border-color .15s; -webkit-tap-highlight-color: transparent;
+}
+.toggle > span::before {
+  content: ""; flex: none; width: 1.125rem; height: 1.125rem; border-radius: 5px; border: 2px solid var(--muted);
+  background: center / 75% no-repeat;
+}
+.toggle input:checked + span { background: var(--accent-soft); border-color: var(--sel-edge); box-shadow: inset 0 0 0 1px var(--sel-edge); color: var(--accent-ink); }
+.toggle input:checked + span::before {
+  border-color: var(--accent-ink); background-color: var(--accent-ink);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
+}
+.toggle input:focus-visible + span { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.toggle:hover input:not(:checked) + span { border-color: var(--sel-edge); }
+.toggle__n { min-width: 1.5rem; padding: 0 6px; border-radius: 999px; background: var(--card-2); color: var(--muted); font-size: .75rem; text-align: center; }
+.toggle input:checked + span .toggle__n { background: var(--card); color: var(--accent-ink); }
 .exlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 12px; margin: 0; padding: 14px; list-style: none; }
 .ex { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); scroll-margin-top: 80px; }
 .ex:hover { border-color: var(--accent-edge); }
@@ -307,6 +328,8 @@ html:not(.js) .ex__fig { display: none; }
 .ex.is-missing .ex__name { color: var(--muted); }
 @container win (max-width: 479px) {
   .exlist { padding: 10px; } .ex { grid-template-columns: 5.5rem minmax(0, 1fr); padding: 10px; }
+  .toggles { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .toggle > span { width: 100%; padding-inline: 10px; border-radius: 12px; line-height: 1.25; }
   /* composer cards on phones: name beside the drawing, the setup tiles full width below it */
   .ex:has(.ex__setups--radio) { grid-template-rows: auto 1fr; row-gap: 6px; align-items: start; }
   .ex:has(.ex__setups--radio) .ex__body { display: contents; }

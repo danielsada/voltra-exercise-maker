@@ -110,7 +110,7 @@ $('#eq-share').addEventListener('click', (e) => {
 });
 
 // ---------- library ----------
-const lib = { filter: 'all', q: '', missing: false };
+const lib = { filter: 'all', q: '', missing: false, chosen: false };
 const items = $$('#exlist > .ex');
 
 function renderSetupList(li, ex, best) {
@@ -139,9 +139,8 @@ function renderSetupList(li, ex, best) {
   }
 }
 
-function matches(li, inWork) {
+function matches(li) {
   const [kind, val] = lib.filter.split(':');
-  if (kind === 'chosen' && !inWork.has(li.dataset.id)) return false;
   if (kind === 'region' && li.dataset.region !== val) return false;
   if (kind === 'pattern' && li.dataset.pattern !== val) return false;
   if (lib.q && !lib.q.split(/\s+/).every((w) => li.dataset.q.includes(w))) return false;
@@ -173,14 +172,14 @@ function applyFilter() {
   let shown = 0;
   for (const li of items) {
     const ex = exById.get(li.dataset.id);
-    const ok = available.has(ex.id);
-    if (ok || lib.missing) {
+    // "Filter by selected": just your workout's exercises, even ones your equipment no longer allows
+    const inSet = lib.chosen ? inWork.has(ex.id) : available.has(ex.id) || lib.missing;
+    if (inSet) {
       counts.all += 1;
       counts[`region:${ex.region}`] = (counts[`region:${ex.region}`] || 0) + 1;
       counts[`pattern:${ex.pattern}`] = (counts[`pattern:${ex.pattern}`] || 0) + 1;
     }
-    // your workout's exercises always show under "In my workout", even ones your equipment no longer allows
-    const visible = (ok || lib.missing || lib.filter === 'chosen') && matches(li, inWork);
+    const visible = inSet && matches(li);
     li.hidden = !visible;
     if (visible) shown += 1;
   }
@@ -191,10 +190,10 @@ function applyFilter() {
   });
   $('#libsel').value = lib.filter;
   $('#libempty').hidden = shown > 0;
-  $('#libempty').textContent = lib.filter === 'chosen' && !inWork.size
+  $('#libempty').textContent = lib.chosen && !inWork.size
     ? 'Your workout is empty. Add exercises with “Add to workout”, or press Compose.'
     : 'Nothing matches. Try another filter, or tick “Include ones I can\'t do yet”.';
-  const filtered = lib.filter !== 'all' || lib.q;
+  const filtered = lib.filter !== 'all' || lib.q || lib.chosen;
   $('#library').classList.toggle('is-filtered', Boolean(filtered));
   $('#libclear').hidden = !filtered;
   $('#libsub').textContent = `${available.size} of ${exercises.length} possible`;
@@ -209,10 +208,13 @@ $$('[data-filter]').forEach((a) => a.addEventListener('click', (e) => {
 $('#libsel').addEventListener('change', (e) => { lib.filter = e.target.value; applyFilter(); });
 $('#libq').addEventListener('input', (e) => { lib.q = e.target.value.trim().toLowerCase(); applyFilter(); });
 $('#libmissing').addEventListener('change', (e) => { lib.missing = e.target.checked; applyFilter(); });
+$('#libchosen').addEventListener('change', (e) => { lib.chosen = e.target.checked; applyFilter(); });
 $('#libclear').addEventListener('click', () => {
   lib.filter = 'all';
   lib.q = '';
+  lib.chosen = false;
   $('#libq').value = '';
+  $('#libchosen').checked = false;
   applyFilter();
 });
 document.addEventListener('keydown', (e) => {
