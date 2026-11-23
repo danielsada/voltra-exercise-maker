@@ -122,7 +122,13 @@ disableKinds = ["taxonomy", "term", "rss"]
     [menus.main.params]
       icon = "mail"
 
-  # This site's own pages (see params.panel.sections).
+  # This site's own pages (see params.panel.sections). The logo links to danielsada.tech, so Home comes first here.
+  [[menus.voltra]]
+    name = "Home"
+    pageRef = "/"
+    weight = 5
+    [menus.voltra.params]
+      icon = "home"
   [[menus.voltra]]
     name = "Timer"
     pageRef = "/timer"
