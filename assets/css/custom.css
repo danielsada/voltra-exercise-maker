@@ -226,9 +226,20 @@ html:not(.js) .ex__fig { display: none; }
 .ex__cue { margin: 0; font-size: .875rem; line-height: 1.45; }
 .ex__add { align-self: flex-start; min-height: 2rem; margin: 2px 0 0 -10px; font-size: .875rem; }
 .ex__add:disabled { display: none; }
-.ex__add.is-on { margin-left: 0; background: var(--accent-soft); border-color: var(--accent-edge); }
-.ex__add.is-on::after { content: "✓"; }
-.ex.is-added { border-color: var(--sel-edge); box-shadow: inset 3px 0 0 var(--accent); }
+/* Added to the workout: the theme's selection look (as in Places), a check on the drawing, a filled button */
+.ex { position: relative; }
+.ex.is-added { background: color-mix(in srgb, var(--accent) 8%, var(--card)); border-color: var(--sel-edge); box-shadow: inset 0 0 0 1px var(--sel-edge); }
+.ex.is-added .ex__fig { position: relative; }
+.ex.is-added .ex__fig::after {
+  content: ""; position: absolute; top: 6px; right: 6px; width: 1.375rem; height: 1.375rem; border-radius: 50%;
+  background: var(--accent-ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 70% no-repeat;
+  box-shadow: 0 0 0 2px var(--card-2); animation: pop .25s ease-out;
+}
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.ex__add.is-on { margin-left: 0; padding-inline: 12px; border-radius: 999px; background: var(--accent-ink); border-color: transparent; color: var(--card); }
+.ex__add.is-on .i { color: inherit; }
+.ex__add.is-on:hover { background: color-mix(in srgb, var(--accent-ink) 85%, var(--text)); }
+.ex__add.is-on::after { content: "✓"; font-weight: 700; }
 /* Exercises page: each setup is a button that shows its drawing */
 .ex__pick { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ex__pick:hover { color: var(--accent-ink); text-decoration: underline; }
