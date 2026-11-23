@@ -1,5 +1,5 @@
-{{- /* Composer page: equipment form, then the workout (a sticky column on the left; a floating bar on phones) next to
-  the exercises that fit (a Dolphin-style window). Every exercise is rendered here so the page works without
+{{- /* Composer page: equipment form, the compose toolbar and the exercises that fit (a Dolphin-style window). The
+  workout itself lives in the panel (voltra/panel-workout.html), so it stays in view; on phones a floating bar opens it. Every exercise is rendered here so the page works without
   JavaScript; assets/js/composer-page.js filters by equipment, draws the figures and composes workouts. */ -}}
 {{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
 {{- $eq := $data.equipment -}}
@@ -65,86 +65,77 @@
     </form>
   </section>
 
-  <div class="cx">
-    <aside class="card cx-work js-only" id="workout" aria-labelledby="co-h">
-      <div class="card-h"><h2 id="co-h">Your workout</h2><span class="cx-count" id="workcount"></span></div>
-      <form id="coform" class="coform">
-        <label class="fld"><span>Focus</span>
-          <select name="focus">
-            <option value="full">Full body</option>
-            <option value="upper">Upper body</option>
-            <option value="lower">Lower body</option>
-            <option value="push">Push</option>
-            <option value="pull">Pull</option>
-            <option value="arms">Arms &amp; shoulders</option>
-            <option value="core">Core</option>
-          </select>
-        </label>
-        <label class="fld fld--num"><span>Exercises</span><input type="number" name="count" min="2" max="12" value="6" inputmode="numeric"></label>
-        <fieldset class="fld">
-          <legend>Format</legend>
-          <div class="seg">
-            <label><input type="radio" name="format" value="tabata" checked><span>Tabata</span></label>
-            <label><input type="radio" name="format" value="interval"><span>Interval</span></label>
-          </div>
-        </fieldset>
-        <button type="submit" class="btn btn--accent">{{ partial "breeze/icon.html" "refresh" }}<span>Compose</span></button>
-      </form>
-      <ol class="worklist" id="worklist" aria-live="polite"></ol>
-      <p class="worklist__empty" id="workempty">Press <b>Compose</b>, or add exercises from the list.</p>
-      <div class="workactions" id="workactions" hidden>
-        <a class="btn btn--accent" id="workstart" href="{{ $timer.RelPermalink }}">{{ partial "breeze/icon.html" "play" }}<span>Start in timer</span></a>
-        <span class="worktime" id="worktime"></span>
-        <button type="button" class="tool" id="workclear">Clear</button>
-      </div>
-    </aside>
-
-    <div class="win lib" id="library">
-      <div class="win__bar">
-        {{ partial "breeze/icon.html" "dumbbell" }}
-        <h2 id="lib-h">Exercises that fit</h2>
-        <p class="win__sub" id="libsub">{{ len $data.exercises }} exercises</p>
-      </div>
-      <div class="win__loc">
-        <label class="show-sel"><span>Show</span>
-          <select id="libsel" aria-label="Show">
-            <option value="all">All</option>
-            {{- range $k := slice "upper" "lower" "core" }}<option value="region:{{ $k }}">{{ index $eq.regions $k }}</option>{{ end }}
-            {{- range $k, $v := $eq.patterns }}<option value="pattern:{{ $k }}">{{ $v.name }}</option>{{ end }}
-          </select>
-        </label>
-        <label class="search">{{ partial "breeze/icon.html" "search" }}<input type="search" id="libq" placeholder="Filter by name or muscle" aria-label="Filter exercises"></label>
-        <label class="chk js-only"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
-      </div>
-      <div class="fm">
-        <nav class="show" aria-label="Filter the list">
-          <div class="show__in">
-            <h3 class="ph">Show</h3>
-            <ul>
-              <li><a href="#library" data-filter="all" aria-current="true">{{ partial "breeze/icon.html" "apps" }}All<span class="n" data-n="all"></span></a></li>
-              {{- range $k := slice "upper" "lower" "core" }}
-              <li><a href="#library" data-filter="region:{{ $k }}">{{ partial "breeze/icon.html" "folder" }}{{ index $eq.regions $k }}<span class="n" data-n="region:{{ $k }}"></span></a></li>
-              {{- end }}
-            </ul>
-            <h3 class="ph">Movement</h3>
-            <ul class="tagl">
-              {{- range $k, $v := $eq.patterns }}
-              <li><a href="#library" data-filter="pattern:{{ $k }}">{{ partial "breeze/icon.html" "tag" }}{{ $v.name }}<span class="n" data-n="pattern:{{ $k }}"></span></a></li>
-              {{- end }}
-            </ul>
-          </div>
-        </nav>
-        <div class="view">
-          <ul class="exlist" id="exlist">
-          {{- range $data.exercises }}
-            {{ partial "voltra/exercise-card.html" (dict "ex" . "eq" $eq "mode" "composer") }}
-          {{- end }}
-          </ul>
-          <p class="empty" id="libempty" hidden>Nothing matches. Try another filter, or tick “Include ones I can't do yet”.</p>
+  <section class="card cx-tools js-only" aria-labelledby="co-h">
+    <div class="card-h"><h2 id="co-h">Compose a workout</h2><span class="cx-hint">Your workout is in the <a href="#workout" class="cx-jump">side panel</a>.</span></div>
+    <form id="coform" class="coform coform--bar">
+      <label class="fld"><span>Focus</span>
+        <select name="focus">
+          <option value="full">Full body</option>
+          <option value="upper">Upper body</option>
+          <option value="lower">Lower body</option>
+          <option value="push">Push</option>
+          <option value="pull">Pull</option>
+          <option value="arms">Arms &amp; shoulders</option>
+          <option value="core">Core</option>
+        </select>
+      </label>
+      <label class="fld fld--num"><span>Exercises</span><input type="number" name="count" min="2" max="12" value="6" inputmode="numeric"></label>
+      <fieldset class="fld">
+        <legend>Format</legend>
+        <div class="seg">
+          <label><input type="radio" name="format" value="tabata" checked><span>Tabata</span></label>
+          <label><input type="radio" name="format" value="interval"><span>Interval</span></label>
         </div>
-      </div>
-      <div class="win__status"><span id="libstatus" role="status">{{ len $data.exercises }} exercises</span><button type="button" class="tool r js-only" id="libclear" hidden>Clear filter</button></div>
+      </fieldset>
+      <button type="submit" class="btn btn--accent">{{ partial "breeze/icon.html" "refresh" }}<span>Compose</span></button>
+    </form>
+  </section>
+
+  <div class="win lib" id="library">
+    <div class="win__bar">
+      {{ partial "breeze/icon.html" "dumbbell" }}
+      <h2 id="lib-h">Exercises that fit</h2>
+      <p class="win__sub" id="libsub">{{ len $data.exercises }} exercises</p>
     </div>
+    <div class="win__loc">
+      <label class="show-sel"><span>Show</span>
+        <select id="libsel" aria-label="Show">
+          <option value="all">All</option>
+          {{- range $k := slice "upper" "lower" "core" }}<option value="region:{{ $k }}">{{ index $eq.regions $k }}</option>{{ end }}
+          {{- range $k, $v := $eq.patterns }}<option value="pattern:{{ $k }}">{{ $v.name }}</option>{{ end }}
+        </select>
+      </label>
+      <label class="search">{{ partial "breeze/icon.html" "search" }}<input type="search" id="libq" placeholder="Filter by name or muscle" aria-label="Filter exercises"></label>
+      <label class="chk js-only"><input type="checkbox" id="libmissing"><span>Include ones I can't do yet</span></label>
+    </div>
+    <div class="fm">
+      <nav class="show" aria-label="Filter the list">
+        <div class="show__in">
+          <h3 class="ph">Show</h3>
+          <ul>
+            <li><a href="#library" data-filter="all" aria-current="true">{{ partial "breeze/icon.html" "apps" }}All<span class="n" data-n="all"></span></a></li>
+            {{- range $k := slice "upper" "lower" "core" }}
+            <li><a href="#library" data-filter="region:{{ $k }}">{{ partial "breeze/icon.html" "folder" }}{{ index $eq.regions $k }}<span class="n" data-n="region:{{ $k }}"></span></a></li>
+            {{- end }}
+          </ul>
+          <h3 class="ph">Movement</h3>
+          <ul class="tagl">
+            {{- range $k, $v := $eq.patterns }}
+            <li><a href="#library" data-filter="pattern:{{ $k }}">{{ partial "breeze/icon.html" "tag" }}{{ $v.name }}<span class="n" data-n="pattern:{{ $k }}"></span></a></li>
+            {{- end }}
+          </ul>
+        </div>
+      </nav>
+      <div class="view">
+        <ul class="exlist" id="exlist">
+        {{- range $data.exercises }}
+          {{ partial "voltra/exercise-card.html" (dict "ex" . "eq" $eq "mode" "composer") }}
+        {{- end }}
+        </ul>
+        <p class="empty" id="libempty" hidden>Nothing matches. Try another filter, or tick “Include ones I can't do yet”.</p>
+      </div>
+    </div>
+    <div class="win__status"><span id="libstatus" role="status">{{ len $data.exercises }} exercises</span><button type="button" class="tool r js-only" id="libclear" hidden>Clear filter</button></div>
   </div>
 
   <div class="cx-fab js-only" id="workfab" hidden>

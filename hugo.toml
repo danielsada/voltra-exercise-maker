@@ -52,11 +52,14 @@ disableKinds = ["taxonomy", "term", "rss"]
 
   [params.panel]
     width = "17rem"
-  # This site's own panel sections, below Places: the tools (menus.voltra), then menus.guide without a title
-  # (layouts/_partials/breeze/panel-projects.html), like ninja.danielsada.tech.
+  # This site's own panel sections, below Places: the tools (menus.voltra), the composer's workout (only on the
+  # composer page), then menus.guide without a title (layouts/_partials/breeze/panel-projects.html), like
+  # ninja.danielsada.tech.
   [[params.panel.sections]]
     menu = "voltra"
     title = "Voltra"
+  [[params.panel.sections]]
+    workout = true
   [[params.panel.sections]]
     menu = "guide"
 

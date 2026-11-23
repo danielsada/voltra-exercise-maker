@@ -1,10 +1,15 @@
 {{- /* Site override of the theme's panel-projects.html: the slot right below Places in the panel (this site doesn't use
   the theme's Projects box). Renders this site's own sections from params.panel.sections ({menu, title}), each a
   Places-style list of [[menus.<menu>]], so Places itself can stay identical to danielsada.tech. A section without a
-  title is a plain list. Links with a #fragment (a function on a chart page) are never marked current. Context dict: page, isPost. */ -}}
+  title is a plain list. Links with a #fragment (a function on a chart page) are never marked current.
+  A section with workout = true is the composer's workout (voltra/panel-workout.html), on pages that load the
+  composer script only. Context dict: page, isPost. */ -}}
 {{- $p := .page -}}
 {{- range $i, $s := (site.Params.panel | default (dict)).sections }}
-{{- with index site.Menus $s.menu }}
+{{- if $s.workout }}
+  {{- if eq $p.Params.script "composer" }}{{ partial "voltra/panel-workout.html" $p }}{{ end }}
+{{- end }}
+{{- with index site.Menus ($s.menu | default "") }}
 {{- $id := printf "app-%s-h" $s.menu }}
 <nav class="appnav{{ if not $s.title }} appnav--plain{{ end }}"{{ with $s.title }} aria-labelledby="{{ $id }}"{{ else }} aria-label="{{ site.Title }}"{{ end }}>
   {{- with $s.title }}

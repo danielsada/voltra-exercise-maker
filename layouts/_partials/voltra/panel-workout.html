@@ -1,0 +1,13 @@
+{{- /* The composer's workout, as a panel section (so it stays in view while you browse exercises; in the phone drawer
+  too). Filled in by assets/js/composer-page.js. Context: the page. */ -}}
+{{- $timer := site.GetPage "/timer" -}}
+<section class="appnav pw js-only" id="workout" aria-labelledby="pw-h">
+  <h2 class="ph pw__h" id="pw-h"><span>Your workout</span><span class="pw__count" id="workcount"></span></h2>
+  <ol class="pw__list" id="worklist" aria-live="polite"></ol>
+  <p class="pw__empty" id="workempty">Add exercises from the list, or press <b>Compose</b>.</p>
+  <div class="pw__acts" id="workactions" hidden>
+    <a class="btn btn--accent pw__start" id="workstart" href="{{ $timer.RelPermalink }}">{{ partial "breeze/icon.html" "play" }}<span>Start in timer</span></a>
+    <span class="pw__time" id="worktime"></span>
+    <button type="button" class="tool pw__clear" id="workclear">Clear</button>
+  </div>
+</section>

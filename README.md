@@ -14,7 +14,7 @@ Made with [Hugo](https://gohugo.io/), like [danielsada.tech](https://danielsada.
 
 | Page | What it does |
 |---|---|
-| **Composer** (`/composer/`) | You pick 1 or 2 Voltras, your anchor points (pull-up bar, overhead, torso and feet height, Travel Platform) and your handles and attachments. It lists every exercise you can do with the setup to use. Add exercises yourself or compose a balanced workout; the workout stays in view (a sticky column, or a floating bar on phones) and goes to the timer. |
+| **Composer** (`/composer/`) | You pick 1 or 2 Voltras, your anchor points (pull-up bar, overhead, torso and feet height, Travel Platform) and your handles and attachments. It lists every exercise you can do with the setup to use. Add exercises yourself or compose a balanced workout; the workout lives in the side panel (in the drawer on phones, opened by a floating bar) so it stays in view, and goes to the timer. |
 | **Exercises** (`/exercises/`) | The whole library with no filters: every exercise and every way to set it up, with animated drawings. |
 | **Timer** (`/timer/`) | Tabata (20/10 × 8 by default), Interval (work, rest, rounds, sets) and Workout mode, which runs a composed workout one exercise at a time with an animated figure. It has beeps, vibration, on-device speech, keeps the screen awake and uses keyboard shortcuts (Space, ←, →, R). |
 | **Equipment** (`/equipment/`) | How the site models anchors, the Travel Platform, attachments and Twin Mode, with sources, and what isn't confirmed. |
@@ -51,7 +51,7 @@ configuration and extension points:
 | What | Where |
 |---|---|
 | Identity, colours, menus, home widgets | `hugo.toml` |
-| Panel: Places (the same links as danielsada.tech), then this site's sections (`params.panel.sections` → `menus.voltra`, `menus.guide`), as on ninja.danielsada.tech | `hugo.toml`, `layouts/_partials/breeze/panel-projects.html` |
+| Panel: Places (the same links as danielsada.tech), then this site's sections (`params.panel.sections` → `menus.voltra`, the composer's workout, `menus.guide`), as on ninja.danielsada.tech | `hugo.toml`, `layouts/_partials/breeze/panel-projects.html`, `layouts/_partials/voltra/panel-workout.html` |
 | Home intro | `content/_index.md` |
 | Home widgets (Start training, Hobby project, From danielsada.tech) | `layouts/_partials/home/quickstart.html`, `disclaimer.html`, `mainsite.html` |
 | Timer, Composer and Exercises pages | `content/*.md` with `params.view` → `layouts/_partials/views/{timer,composer,exercises}.html` |

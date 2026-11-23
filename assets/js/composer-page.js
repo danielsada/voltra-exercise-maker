@@ -262,6 +262,7 @@ coform.addEventListener('submit', (e) => {
   saveWork();
   renderWorkout();
   if (!work.items.length) $('#workempty').textContent = 'Nothing fits your equipment yet. Add an anchor point or a handle above.';
+  else if (!drawerMode()) showWorkout();
 });
 coform.addEventListener('change', (e) => {
   if (e.target.name === 'format') {
@@ -289,8 +290,29 @@ $('#exlist').addEventListener('click', (e) => {
   saveWork();
   renderWorkout();
   const added = $('#worklist .is-new');
-  if (added) added.scrollIntoView({ block: 'nearest' });
+  if (added && !drawerMode()) added.scrollIntoView({ block: 'nearest' });
 });
+
+// The workout lives in the panel: in view on wide screens, in the drawer on phones.
+const drawerMode = () => {
+  const bar = $('.topbar');
+  return Boolean(bar) && getComputedStyle(bar).display !== 'none';
+};
+function showWorkout() {
+  const open = $('.topbar [data-open]');
+  if (drawerMode() && open) open.click();
+  const w = $('#workout');
+  requestAnimationFrame(() => {
+    w.scrollIntoView({ block: 'nearest' });
+    w.classList.remove('is-flash');
+    void w.offsetWidth; // restart the highlight
+    w.classList.add('is-flash');
+  });
+}
+$$('.cx-jump, .cx-fab__open').forEach((a) => a.addEventListener('click', (e) => {
+  e.preventDefault();
+  showWorkout();
+}));
 
 writeForm();
 onProfile();
