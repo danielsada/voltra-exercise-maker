@@ -297,6 +297,7 @@ function renderWorkout(keep) {
     b.closest('.ex').classList.toggle('is-added', on);
   });
   $('#workfab').hidden = !has;
+  $('#shuffle').disabled = n < 2;
   if (has) {
     const start = $('#workstart');
     const fab = $('#fabstart');
@@ -352,6 +353,23 @@ coform.addEventListener('change', (e) => {
     saveWork();
     renderWorkout();
   }
+});
+// Shuffle: a new random order for the exercises you have (always different from the current one).
+$('#shuffle').addEventListener('click', () => {
+  const n = work.items.length;
+  if (n < 2) return;
+  const before = work.items.map((it) => it.id).join();
+  do {
+    for (let i = n - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [work.items[i], work.items[j]] = [work.items[j], work.items[i]];
+    }
+  } while (work.items.map((it) => it.id).join() === before);
+  fresh = new Set(work.items.map((it) => it.id));
+  saveWork();
+  renderWorkout();
+  say(`Shuffled: ${work.items.map((it) => nameOf(it.id)).join(', ')}.`);
+  if (!drawerMode()) showWorkout();
 });
 $('#workclear').addEventListener('click', () => {
   work.items = [];

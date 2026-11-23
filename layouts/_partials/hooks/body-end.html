@@ -7,6 +7,7 @@
   <a href="{{ $official }}" rel="noopener">beyond-power.com</a> for official information. Train safely and follow the
   manufacturer's instructions.</p>
 </footer>
+{{ partial "voltra/script.html" "app" }}
 {{- with .Params.script }}
 {{ partial "voltra/script.html" . }}
 {{- end }}

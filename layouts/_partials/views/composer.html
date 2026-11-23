@@ -68,7 +68,7 @@
   </section>
 
   <section class="card cx-tools js-only" aria-labelledby="co-h">
-    <div class="card-h"><h2 id="co-h">Compose a workout</h2><span class="cx-hint">Your workout is in the <a href="#workout" class="cx-jump">side panel</a>.</span></div>
+    <div class="card-h"><h2 id="co-h">Compose a workout</h2></div>
     <form id="coform" class="coform coform--bar">
       <label class="fld"><span>Focus</span>
         <select name="focus">
@@ -82,15 +82,19 @@
         </select>
       </label>
       <label class="fld fld--num"><span>Exercises</span><input type="number" name="count" min="2" max="12" value="6" inputmode="numeric"></label>
-      <fieldset class="fld">
-        <legend>Format</legend>
+      <div class="fld" role="radiogroup" aria-labelledby="fmt-l">
+        <span id="fmt-l">Format</span>
         <div class="seg">
           <label><input type="radio" name="format" value="tabata" checked><span>Tabata</span></label>
           <label><input type="radio" name="format" value="interval"><span>Interval</span></label>
         </div>
-      </fieldset>
-      <button type="submit" class="btn btn--accent">{{ partial "breeze/icon.html" "refresh" }}<span>Compose</span></button>
+      </div>
+      <div class="coform__acts">
+        <button type="submit" class="btn btn--accent">{{ partial "breeze/icon.html" "refresh" }}<span>Compose</span></button>
+        <button type="button" class="btn" id="shuffle" title="Shuffle the order of your workout" disabled>{{ partial "breeze/icon.html" "shuffle" }}<span>Shuffle</span></button>
+      </div>
     </form>
+    <p class="cx-hint">Compose picks new exercises; Shuffle mixes the order of the ones you have. Your workout is in the <a href="#workout" class="cx-jump">side panel</a>.</p>
   </section>
 
   <div class="win lib" id="library">

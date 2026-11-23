@@ -1,0 +1,47 @@
+{{- /* Installable app (PWA): icons made by Hugo from the logo, the web app manifest and the service worker
+  (assets/pwa/sw.js, a template). Published once per build; returns the <head> tags. Usage: partialCached
+  "voltra/pwa.html" . "pwa". No external requests: everything is served from this site. */ -}}
+{{- $logo := resources.Get site.Params.logo -}}
+{{- $white := "#ffffff" -}}
+{{- /* 512×512: the logo on a white square. "maskable" keeps it inside the centre safe zone (Android crops to a circle). */ -}}
+{{- $any := ($logo.Resize "400x").Filter (images.Padding 156 56 156 56 $white) | resources.Copy "icons/icon-512.png" -}}
+{{- $mask := ($logo.Resize "300x").Filter (images.Padding 181 106 181 106 $white) | resources.Copy "icons/icon-maskable-512.png" -}}
+{{- $any192 := $any.Resize "192x192" | resources.Copy "icons/icon-192.png" -}}
+{{- $apple := $any.Resize "180x180" | resources.Copy "icons/apple-touch-icon.png" -}}
+
+{{- $timer := site.GetPage "/timer" -}}
+{{- $composer := site.GetPage "/composer" -}}
+{{- $exercises := site.GetPage "/exercises" -}}
+{{- $manifest := dict
+  "id" site.Home.RelPermalink
+  "name" site.Title
+  "short_name" "Voltra"
+  "description" site.Params.description
+  "lang" (site.Language.Locale | default "en-US")
+  "start_url" site.Home.RelPermalink
+  "scope" site.Home.RelPermalink
+  "display" "standalone"
+  "orientation" "any"
+  "background_color" "#1c1f24"
+  "theme_color" (site.Params.colors.wall | default "#3d6fd6")
+  "icons" (slice
+    (dict "src" $any192.RelPermalink "sizes" "192x192" "type" "image/png" "purpose" "any")
+    (dict "src" $any.RelPermalink "sizes" "512x512" "type" "image/png" "purpose" "any")
+    (dict "src" $mask.RelPermalink "sizes" "512x512" "type" "image/png" "purpose" "maskable"))
+  "shortcuts" (slice
+    (dict "name" "Timer" "url" $timer.RelPermalink "icons" (slice (dict "src" $any192.RelPermalink "sizes" "192x192")))
+    (dict "name" "Composer" "url" $composer.RelPermalink "icons" (slice (dict "src" $any192.RelPermalink "sizes" "192x192")))
+    (dict "name" "Exercises" "url" $exercises.RelPermalink "icons" (slice (dict "src" $any192.RelPermalink "sizes" "192x192"))))
+-}}
+{{- $mf := resources.FromString "manifest.webmanifest" (jsonify (dict "indent" "  ") $manifest) -}}
+
+{{- /* The pages to keep offline; their CSS, JS, icons and images are found by the service worker when it installs. */ -}}
+{{- $pages := slice site.Home.RelPermalink -}}
+{{- range site.RegularPages }}{{ $pages = $pages | append .RelPermalink }}{{ end -}}
+{{- $ctx := dict "base" site.Home.RelPermalink "pages" $pages "version" (now.Format "20060102150405") "icons" (slice $any192.RelPermalink $any.RelPermalink $mask.RelPermalink $apple.RelPermalink) -}}
+{{- $sw := resources.Get "pwa/sw.js" | resources.ExecuteAsTemplate "sw.js" $ctx -}}
+{{- $sw.Publish -}}
+{{- $any192.Publish }}{{ $any.Publish }}{{ $mask.Publish }}{{ $apple.Publish }}{{ $mf.Publish -}}
+
+{{- $tags := printf `<link rel="manifest" href="%s"><link rel="apple-touch-icon" href="%s"><meta name="apple-mobile-web-app-title" content="Voltra"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">` $mf.RelPermalink $apple.RelPermalink -}}
+{{- return $tags -}}

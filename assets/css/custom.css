@@ -14,6 +14,13 @@ html:not(.js) .js-only { display: none !important; }
 /* ---------- Panel: this site's own sections, below the shared Places (as on ninja.danielsada.tech) ---------- */
 .appnav { padding-top: 10px; border-top: 1px solid var(--line); }
 .appnav--plain { padding-top: 6px; }
+/* "Install app" looks like a Places entry */
+.nav__btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: 0; border-radius: 8px;
+  background: none; color: var(--text); font: inherit; font-size: .9375rem; text-align: left; cursor: pointer; }
+.nav__btn:hover { background: var(--accent-soft); }
+.nav__btn .i { color: var(--muted); }
+.pwa__ios { margin: 4px 10px 2px; font-size: .8125rem; line-height: 1.5; color: var(--muted); }
+.pwa__ios .i { display: inline-block; vertical-align: -2px; width: .9rem; height: .9rem; }
 
 /* ---------- footer disclaimer (every page) ---------- */
 .vfoot {
@@ -157,8 +164,22 @@ html:not(.js) .js-only { display: none !important; }
 .workactions .tool { margin-left: auto; }
 
 /* Compose toolbar (one row on wide screens). The workout itself is a panel section, below. */
-.cx-hint { margin-left: auto; font-size: .875rem; color: var(--muted); }
+/* every control in the toolbar is one height, so labels and controls line up */
+.coform--bar { --ctl: 2.5rem; align-items: flex-end; gap: 12px 14px; }
 .coform--bar .fld:first-child { flex: 0 1 13rem; }
+.coform--bar .fld select, .coform--bar .fld input { height: var(--ctl); }
+.coform--bar .seg { height: var(--ctl); align-items: stretch; }
+.coform--bar .seg label { display: flex; }
+.coform--bar .seg span { display: flex; align-items: center; height: 100%; padding-block: 0; }
+.coform__acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.coform__acts .btn { height: var(--ctl); min-height: 0; }
+.cx-hint { margin: 14px 0 0; font-size: .875rem; color: var(--muted); }
+@media (pointer: coarse) { .coform--bar { --ctl: 44px; } }
+@media (max-width: 699px) {
+  .coform--bar .fld:first-child { flex: 1 1 100%; }
+  .coform__acts { flex: 1 1 100%; }
+  .coform__acts .btn { flex: 1; }
+}
 
 /* ---------- The workout, as a section of the translucent panel (voltra/panel-workout.html) ---------- */
 .pw { padding-top: 10px; border-top: 1px solid var(--line); }
@@ -337,6 +358,14 @@ html:not(.js) .diagram__fig { display: none; }
 .worklist--plan .wi.is-current { margin: 0 -10px; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--sel-edge); }
 .worklist--plan .wi.is-done { opacity: .55; }
 @media (max-width: 699px) {
+  /* keep the dial, the current exercise and the controls on one phone screen */
+  .tm__dial { width: min(100%, 15.5rem); }
+  .tm__stage { gap: 12px; padding-top: 4px; }
+  .tm__stage:has(.tm__ex:not([hidden])) .tm__dial { width: min(100%, 13.5rem); }
+  .tm__time { font-size: clamp(3rem, 1.6rem + 8vw, 4.25rem); }
+  .tm__excue { display: none; }
+  .tm__progress { margin-top: 12px; }
+  .tm__controls { margin-top: 12px; }
   .tm { padding: 16px 14px 18px; }
   .seg--tabs { margin-left: 0; }
   .tm__ex { grid-template-columns: 7rem minmax(0, 1fr); }

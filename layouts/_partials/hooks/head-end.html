@@ -14,3 +14,5 @@
     {{- ($og | resources.Copy "images/og-image.png").Publish -}}
   {{- end -}}
 {{- end -}}
+{{- /* Installable app: manifest, icons and service worker (voltra/pwa.html). */}}
+{{ partialCached "voltra/pwa.html" . "pwa" | safeHTML }}
