@@ -7,6 +7,15 @@
   <a href="{{ $official }}" rel="noopener">beyond-power.com</a> for official information. Train safely and follow the
   manufacturer's instructions.</p>
 </footer>
+{{- /* iPhone/iPad install tip (iOS has no install prompt); shown by assets/js/app-page.js. */}}
+<aside class="ios-tip js-only" id="ios-tip" role="dialog" aria-labelledby="ios-tip-h" hidden>
+  <img class="ios-tip__icon" src="{{ "icons/apple-touch-icon.png" | relURL }}" alt="" width="44" height="44">
+  <div class="ios-tip__body">
+    <p class="ios-tip__h" id="ios-tip-h">Install Voltra on your Home Screen</p>
+    <p class="ios-tip__steps">Tap {{ partial "breeze/icon.html" "share" }} <b>Share</b> <span data-where>in the bar at the bottom</span>, then <b>Add to Home Screen</b>. It opens full screen and works offline.</p>
+  </div>
+  <button type="button" class="tool tool--plain ios-tip__close" aria-label="Close">{{ partial "breeze/icon.html" "close" }}</button>
+</aside>
 {{ partial "voltra/script.html" "app" }}
 {{- with .Params.script }}
 {{ partial "voltra/script.html" . }}

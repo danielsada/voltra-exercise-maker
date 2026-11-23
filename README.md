@@ -22,8 +22,9 @@ Made with [Hugo](https://gohugo.io/), like [danielsada.tech](https://danielsada.
 It makes no third-party requests and loads no web fonts. Settings are saved in your browser (`localStorage`), and
 workouts and equipment setups can be shared as links (everything is in the URL hash).
 
-It's also an installable app (PWA): "Install app" appears in the side panel when the browser supports it (on iPhone:
-Share → Add to Home Screen), and it works offline. Hugo makes the icons from the logo, the manifest and the service
+It's also an installable app (PWA): "Install app" appears in the side panel when the browser supports it, and it works
+offline. iPhone and iPad have no install prompt, so there a dismissible tip points at Share → Add to Home Screen
+(`#ios-tip` in `hooks/body-end.html`; set `localStorage['voltra:ios-tip'] = 'force'` to see it on a desktop). Hugo makes the icons from the logo, the manifest and the service
 worker (`layouts/_partials/voltra/pwa.html`, `assets/pwa/sw.js`); there's still nothing to install to build it.
 
 ## Running the project
