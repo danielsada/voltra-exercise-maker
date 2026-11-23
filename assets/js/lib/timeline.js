@@ -2,6 +2,9 @@
 // Phase: { kind: 'prep'|'work'|'rest'|'setRest'|'done', seconds, label, round, rounds, set, sets, item, side }
 
 export const TABATA_DEFAULTS = { prep: 10, work: 20, rest: 10, rounds: 8, sets: 1, setRest: 60 };
+// Niels Vollaard's REHIT (reduced-exertion HIIT): an easy warm-up, two 20-second all-out sprints with a few easy
+// minutes between, and an easy cool-down; about 10 minutes.
+export const VOLLAARD_DEFAULTS = { prep: 180, work: 20, rest: 180, rounds: 2, coolDown: 180 };
 export const INTERVAL_DEFAULTS = { prep: 10, work: 40, rest: 20, rounds: 6, sets: 3, setRest: 90 };
 export const WORKOUT_DEFAULTS = {
   prep: 15,
@@ -14,7 +17,7 @@ export const WORKOUT_DEFAULTS = {
 
 const LIMITS = {
   prep: [0, 600], work: [1, 3600], rest: [0, 3600], rounds: [1, 99], sets: [1, 50], setRest: [0, 3600],
-  exRest: [0, 3600], circuits: [1, 20], circuitRest: [0, 3600],
+  exRest: [0, 3600], circuits: [1, 20], circuitRest: [0, 3600], coolDown: [0, 3600],
 };
 
 export function clampConfig(cfg, defaults) {
@@ -48,6 +51,21 @@ export function buildInterval(cfg) {
 }
 
 export const buildTabata = (cfg) => buildInterval(clampConfig(cfg, TABATA_DEFAULTS));
+
+// Phases carry their own `title` (shown) and `say` (spoken), since warm-up, sprint and recovery aren't Tabata words.
+export function buildVollaard(cfg) {
+  const c = clampConfig(cfg, VOLLAARD_DEFAULTS);
+  const at = (r) => ({ round: r, rounds: c.rounds, set: 1, sets: 1 });
+  const phases = [];
+  if (c.prep) phases.push({ kind: 'prep', seconds: c.prep, label: 'Warm up', title: 'Warm up', say: 'Warm up, easy', ...at(1) });
+  for (let r = 1; r <= c.rounds; r++) {
+    phases.push({ kind: 'work', seconds: c.work, label: 'Sprint', title: 'Sprint', say: 'Sprint. All out!', ...at(r) });
+    if (r < c.rounds && c.rest) phases.push({ kind: 'rest', seconds: c.rest, label: 'Recover', title: 'Recover', say: 'Easy. Recover', ...at(r) });
+  }
+  if (c.coolDown) phases.push({ kind: 'setRest', seconds: c.coolDown, label: 'Cool down', title: 'Cool down', say: 'Cool down, easy', ...at(c.rounds) });
+  phases.push(done());
+  return phases;
+}
 
 // items: [{ name, unilateral }] in order. format: 'tabata' | 'interval'.
 export function buildWorkout(items, cfg = {}) {

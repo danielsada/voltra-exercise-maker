@@ -1,4 +1,4 @@
-{{- /* Timer page: Tabata, Interval and Workout modes. Everything runs in assets/js/timer-page.js;
+{{- /* Timer page: Tabata, Vollaard (REHIT), Interval and Workout modes. Everything runs in assets/js/timer-page.js;
   without JavaScript the page explains that the timer needs it. */ -}}
 {{- $composer := site.Home -}}
 <div class="vx vx-timer">
@@ -7,6 +7,7 @@
       <h1 id="page-h">Voltra timer</h1>
       <div class="seg seg--tabs js-only" role="radiogroup" aria-label="Timer mode">
         <label><input type="radio" name="mode" value="tabata" checked><span>Tabata</span></label>
+        <label><input type="radio" name="mode" value="vollaard"><span>Vollaard</span></label>
         <label><input type="radio" name="mode" value="interval"><span>Interval</span></label>
         <label><input type="radio" name="mode" value="workout"><span>Workout</span></label>
       </div>
@@ -65,6 +66,16 @@
         <label class="fld fld--num"><span>Rounds</span><input type="number" name="rounds" min="1" max="99" inputmode="numeric"></label>
         <label class="fld fld--num"><span data-label-sets>Sets</span><input type="number" name="sets" min="1" max="50" inputmode="numeric"></label>
         <label class="fld fld--num"><span>Rest between sets</span><input type="number" name="setRest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+      </div>
+      <div class="setgrid" data-for="vollaard" hidden>
+        <p class="setabout fld--wide">Niels Vollaard's <b>REHIT</b> (reduced-exertion HIIT): an easy warm-up, two 20-second
+          <b>all-out</b> sprints with a few easy minutes between them, and an easy cool-down. About 10 minutes. Pick one
+          big movement you can drive hard and safely, like rows or squats.</p>
+        <label class="fld fld--num"><span>Warm up</span><input type="number" name="vprep" min="0" max="600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Sprint</span><input type="number" name="vwork" min="1" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Sprints</span><input type="number" name="vrounds" min="1" max="99" inputmode="numeric"></label>
+        <label class="fld fld--num"><span>Recovery between</span><input type="number" name="vrest" min="0" max="3600" inputmode="numeric"><i>s</i></label>
+        <label class="fld fld--num"><span>Cool down</span><input type="number" name="vcool" min="0" max="3600" inputmode="numeric"><i>s</i></label>
       </div>
       <div class="setgrid" data-for="workout" hidden>
         <fieldset class="fld fld--wide">

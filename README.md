@@ -14,9 +14,9 @@ Made with [Hugo](https://gohugo.io/), like [danielsada.tech](https://danielsada.
 
 | Page | What it does |
 |---|---|
-| **Composer** (home page, `/`) | You pick 1 or 2 Voltras, your anchor points (pull-up bar, overhead, torso and feet height, Travel Platform) and your handles and attachments. It lists every exercise you can do with the setup to use. Add exercises yourself or compose a balanced workout; the workout lives in the side panel (in the drawer on phones, opened by a floating bar) so it stays in view, and goes to the timer. |
+| **Composer** (home page, `/`) | You pick 1 or 2 Voltras, your anchor points (pull-up bar, overhead, torso and feet height, Travel Platform) and your handles and attachments. It lists every exercise you can do with the setup to use; when more than one setup fits, you tap the one you prefer (remembered per exercise). Add exercises yourself or compose a balanced workout; the workout lives in the side panel (in the drawer on phones, opened by a floating bar) so it stays in view, and goes to the timer. Show → In my workout filters the list to the exercises you picked. |
 | **Exercises** (`/exercises/`) | The whole library with no filters: every exercise and every way to set it up, with animated drawings. |
-| **Timer** (`/timer/`) | Tabata (20/10 × 8 by default), Interval (work, rest, rounds, sets) and Workout mode, which runs a composed workout one exercise at a time with an animated figure. It has beeps, vibration, on-device speech, keeps the screen awake and uses keyboard shortcuts (Space, ←, →, R). |
+| **Timer** (`/timer/`) | Tabata (20/10 × 8 by default), Vollaard (REHIT: warm-up, 2 × 20 s all-out sprints with 3 min easy between, cool-down), Interval (work, rest, rounds, sets) and Workout mode, which runs a composed workout one exercise at a time with an animated figure. It has beeps, vibration, on-device speech, keeps the screen awake and uses keyboard shortcuts (Space, ←, →, R). |
 | **Equipment** (`/equipment/`) | How the site models anchors, the Travel Platform, attachments and Twin Mode, with sources, and what isn't confirmed. |
 
 It makes no third-party requests and loads no web fonts. Settings are saved in your browser (`localStorage`), and

@@ -1,6 +1,6 @@
 // Composer page: equipment form ↔ profile, library filtering, figures, workout composing.
 import * as P from '@params';
-import { normalizeProfile, defaultProfile, availableExercises, closestSetup, describeMissing, describeSetup, HEIGHTS } from './lib/equipment.js';
+import { normalizeProfile, defaultProfile, availableExercises, checkSetup, closestSetup, describeMissing, describeSetup, HEIGHTS } from './lib/equipment.js';
 import { compose, swap, newSeed } from './lib/compose.js';
 import { buildWorkout, totalSeconds } from './lib/timeline.js';
 import { encodeProfile, decodeProfile, encodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
@@ -19,7 +19,18 @@ const linked = decodeProfile(location.hash);
 const savedProfile = store.get('profile');
 let viewingLink = Boolean(linked);
 let profile = normalizeProfile(linked || savedProfile || defaultProfile(), eq);
-let available = new Map();
+let available = new Map(); // exercise id → the setup to use (your pick when it fits, else the best fit)
+
+// Your pick of setup for exercises you can do more than one way (e.g. squats on the Travel Platform instead of
+// with two handles). Kept per exercise, and used whenever your equipment allows it.
+const choices = obj(store.get('setups'));
+const fits = (ex, i) => checkSetup(ex.setups[i], profile, eq).ok;
+function applyChoices() {
+  for (const [id, i] of Object.entries(choices)) {
+    const ex = exById.get(id);
+    if (ex && available.has(id) && Number.isInteger(i) && ex.setups[i] && fits(ex, i)) available.set(id, i);
+  }
+}
 
 function writeForm() {
   form.elements.units.value = String(profile.units);
@@ -70,6 +81,7 @@ function onProfile() {
   $('#eqlink').hidden = !viewingLink;
   if (location.hash.includes('u=')) history.replaceState(null, '', location.pathname + location.search);
   available = availableExercises(exercises, profile, eq);
+  applyChoices();
   syncFormState();
   renderLibrary();
   refreshWorkout();
@@ -102,10 +114,17 @@ const lib = { filter: 'all', q: '', missing: false };
 const items = $$('#exlist > .ex');
 
 function renderSetupList(li, ex, best) {
+  let n = 0;
   $$('.ex__setups > li', li).forEach((s, i) => {
+    const ok = fits(ex, i);
+    if (ok) n += 1;
     s.classList.toggle('is-best', i === best);
-    s.classList.toggle('is-off', best !== null && i !== best);
+    s.classList.toggle('is-off', !ok);
+    const b = $('.ex__pick', s);
+    b.disabled = !ok;
+    b.setAttribute('aria-pressed', String(i === best));
   });
+  $('.ex__choose', li).hidden = n < 2;
   let need = $('.ex__need', li);
   if (best === null) {
     const c = closestSetup(ex, profile, eq);
@@ -120,34 +139,48 @@ function renderSetupList(li, ex, best) {
   }
 }
 
-function matches(li) {
+function matches(li, inWork) {
   const [kind, val] = lib.filter.split(':');
+  if (kind === 'chosen' && !inWork.has(li.dataset.id)) return false;
   if (kind === 'region' && li.dataset.region !== val) return false;
   if (kind === 'pattern' && li.dataset.pattern !== val) return false;
   if (lib.q && !lib.q.split(/\s+/).every((w) => li.dataset.q.includes(w))) return false;
   return true;
 }
 
+function renderCard(li) {
+  const ex = exById.get(li.dataset.id);
+  const best = available.has(ex.id) ? available.get(ex.id) : null;
+  const ok = best !== null;
+  li.classList.toggle('is-possible', ok);
+  li.classList.toggle('is-missing', !ok);
+  renderSetupList(li, ex, best);
+  $('.ex__add', li).disabled = !ok;
+  const idx = ok ? best : closestSetup(ex, profile, eq).index;
+  mountFigure($('.ex__fig', li), figureSVG(ex, idx, eq, { profile }));
+  showEachSide(li, ex, ex.setups[idx]);
+}
+
 function renderLibrary() {
-  const counts = { all: 0 };
+  items.forEach(renderCard);
+  applyFilter();
+}
+
+// Counts and which cards show; cheap, so it also runs whenever the workout changes ("In my workout").
+function applyFilter() {
+  const inWork = new Set(work.items.map((it) => it.id));
+  const counts = { all: 0, chosen: inWork.size };
   let shown = 0;
   for (const li of items) {
     const ex = exById.get(li.dataset.id);
-    const best = available.has(ex.id) ? available.get(ex.id) : null;
-    const ok = best !== null;
-    li.classList.toggle('is-possible', ok);
-    li.classList.toggle('is-missing', !ok);
-    renderSetupList(li, ex, best);
-    $('.ex__add', li).disabled = !ok;
-    const idx = ok ? best : closestSetup(ex, profile, eq).index;
-    mountFigure($('.ex__fig', li), figureSVG(ex, idx, eq, { profile }));
-    showEachSide(li, ex, ex.setups[idx]);
+    const ok = available.has(ex.id);
     if (ok || lib.missing) {
       counts.all += 1;
       counts[`region:${ex.region}`] = (counts[`region:${ex.region}`] || 0) + 1;
       counts[`pattern:${ex.pattern}`] = (counts[`pattern:${ex.pattern}`] || 0) + 1;
     }
-    const visible = (ok || lib.missing) && matches(li);
+    // your workout's exercises always show under "In my workout", even ones your equipment no longer allows
+    const visible = (ok || lib.missing || lib.filter === 'chosen') && matches(li, inWork);
     li.hidden = !visible;
     if (visible) shown += 1;
   }
@@ -158,6 +191,9 @@ function renderLibrary() {
   });
   $('#libsel').value = lib.filter;
   $('#libempty').hidden = shown > 0;
+  $('#libempty').textContent = lib.filter === 'chosen' && !inWork.size
+    ? 'Your workout is empty. Add exercises with “Add to workout”, or press Compose.'
+    : 'Nothing matches. Try another filter, or tick “Include ones I can\'t do yet”.';
   const filtered = lib.filter !== 'all' || lib.q;
   $('#library').classList.toggle('is-filtered', Boolean(filtered));
   $('#libclear').hidden = !filtered;
@@ -168,16 +204,16 @@ function renderLibrary() {
 $$('[data-filter]').forEach((a) => a.addEventListener('click', (e) => {
   e.preventDefault();
   lib.filter = a.dataset.filter;
-  renderLibrary();
+  applyFilter();
 }));
-$('#libsel').addEventListener('change', (e) => { lib.filter = e.target.value; renderLibrary(); });
-$('#libq').addEventListener('input', (e) => { lib.q = e.target.value.trim().toLowerCase(); renderLibrary(); });
-$('#libmissing').addEventListener('change', (e) => { lib.missing = e.target.checked; renderLibrary(); });
+$('#libsel').addEventListener('change', (e) => { lib.filter = e.target.value; applyFilter(); });
+$('#libq').addEventListener('input', (e) => { lib.q = e.target.value.trim().toLowerCase(); applyFilter(); });
+$('#libmissing').addEventListener('change', (e) => { lib.missing = e.target.checked; applyFilter(); });
 $('#libclear').addEventListener('click', () => {
   lib.filter = 'all';
   lib.q = '';
   $('#libq').value = '';
-  renderLibrary();
+  applyFilter();
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
@@ -296,6 +332,7 @@ function renderWorkout(keep) {
     b.querySelector('span').textContent = on ? 'Added' : 'Add to workout';
     b.closest('.ex').classList.toggle('is-added', on);
   });
+  applyFilter();
   $('#workfab').hidden = !has;
   $('#shuffle').disabled = n < 2;
   if (has) {
@@ -378,6 +415,20 @@ $('#workclear').addEventListener('click', () => {
   say('Workout cleared.');
 });
 $('#exlist').addEventListener('click', (e) => {
+  const pick = e.target.closest('.ex__pick');
+  if (pick) {
+    const li = pick.closest('.ex');
+    const ex = exById.get(li.dataset.id);
+    const i = Number(pick.dataset.setup);
+    if (!available.has(ex.id) || available.get(ex.id) === i || !fits(ex, i)) return;
+    choices[ex.id] = i;
+    store.set('setups', choices);
+    available.set(ex.id, i);
+    renderCard(li);
+    refreshWorkout();
+    say(`${ex.name}: ${describeSetup(ex.setups[i], eq)}.`);
+    return;
+  }
   const b = e.target.closest('[data-add]');
   if (!b || !available.has(b.dataset.add)) return;
   const id = b.dataset.add;

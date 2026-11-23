@@ -1,5 +1,6 @@
-{{- /* One exercise card. Context: dict "ex" "eq" "mode" ("composer": add button, setups as a list; "library": every
-  setup is a button that shows that setup's drawing). The figure is drawn by the page script. */ -}}
+{{- /* One exercise card. Context: dict "ex" "eq" "mode". Every setup is a button: "library" shows that setup's drawing;
+  "composer" (which also has the add button) uses it for this exercise when your equipment allows it. The figure is
+  drawn by the page script. */ -}}
 {{- $ex := .ex -}}
 {{- $eq := .eq -}}
 {{- $pat := index $eq.patterns $ex.pattern -}}
@@ -14,10 +15,13 @@
         {{- if eq $.mode "library" }}
         <li{{ if eq $i 0 }} class="is-best"{{ end }}><button type="button" class="ex__pick" data-setup="{{ $i }}"{{ if eq $i 0 }} aria-pressed="true"{{ else }} aria-pressed="false"{{ end }}>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</button></li>
         {{- else }}
-        <li>{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</li>
+        <li><button type="button" class="ex__pick" data-setup="{{ $i }}" aria-pressed="false">{{ partial "voltra/setup-text.html" (dict "setup" $s "eq" $eq) }}</button></li>
         {{- end }}
       {{- end }}
       </ul>
+      {{- if eq .mode "composer" }}
+      <p class="ex__choose js-only" hidden>You can do this more than one way: tap a setup to use it.</p>
+      {{- end }}
     </div>
     <p class="ex__cue">{{ $ex.cue }}</p>
     {{- if eq .mode "composer" }}

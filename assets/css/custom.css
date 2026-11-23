@@ -283,7 +283,9 @@ html:not(.js) .ex__fig { display: none; }
 .ex__add.is-on::after { content: "✓"; font-weight: 700; }
 /* Exercises page: each setup is a button that shows its drawing */
 .ex__pick { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.ex__pick:hover { color: var(--accent-ink); text-decoration: underline; }
+.ex__pick:not(:disabled):hover { color: var(--accent-ink); text-decoration: underline; }
+.ex__pick:disabled { cursor: default; }
+.ex__choose { margin: 2px 0 0; font-size: .75rem; color: var(--muted); }
 .lib--all .exlist { grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); }
 .ex.is-missing { background: var(--card-2); }
 .ex.is-missing .ex__fig { opacity: .5; filter: grayscale(1); }
@@ -373,6 +375,8 @@ html:not(.js) .diagram__fig { display: none; }
 .setgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 12px 14px; }
 .fld--wide { grid-column: 1 / -1; }
 .setnote { margin: 12px 0 0; color: var(--muted); font-size: .875rem; }
+.setabout { margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.5; }
+.setabout b { color: var(--text); }
 .worklist--plan { margin-top: 0; }
 .tm-about { max-width: none; margin: 0; padding: 22px 26px 24px; }
 .tm-about h2 { margin-top: 0; }
@@ -389,7 +393,8 @@ html:not(.js) .diagram__fig { display: none; }
   .tm__progress { margin-top: 12px; }
   .tm__controls { margin-top: 12px; }
   .tm { padding: 16px 14px 18px; }
-  .seg--tabs { margin-left: 0; }
+  .seg--tabs { display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; margin-left: 0; }
+  .seg--tabs span { padding-inline: 4px; text-align: center; }
   .tm__ex { grid-template-columns: 7rem minmax(0, 1fr); }
   .tm__exname { font-size: 1.125rem; }
   .btn--big { min-width: 7.5rem; }

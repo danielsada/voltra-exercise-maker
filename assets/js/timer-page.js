@@ -1,7 +1,7 @@
 // Timer page: Tabata, Interval and Workout modes on the timestamp-based Engine.
 import * as P from '@params';
 import { Engine } from './lib/engine.js';
-import { TABATA_DEFAULTS, INTERVAL_DEFAULTS, WORKOUT_DEFAULTS, buildTabata, buildInterval, buildWorkout, clampConfig, totalSeconds, formatTime } from './lib/timeline.js';
+import { TABATA_DEFAULTS, VOLLAARD_DEFAULTS, INTERVAL_DEFAULTS, WORKOUT_DEFAULTS, buildTabata, buildVollaard, buildInterval, buildWorkout, clampConfig, totalSeconds, formatTime } from './lib/timeline.js';
 import { decodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
 import { describeSetup } from './lib/equipment.js';
 import { store, $, $$, figureSVG, unilateralOf } from './lib/ui.js';
@@ -28,6 +28,7 @@ function normWorkout(raw) {
 const saved = obj(store.get('timer'));
 const cfg = {
   tabata: clampConfig(obj(saved.tabata), TABATA_DEFAULTS),
+  vollaard: clampConfig(obj(saved.vollaard), VOLLAARD_DEFAULTS),
   interval: clampConfig(obj(saved.interval), INTERVAL_DEFAULTS),
   workout: normWorkout(saved.workout),
   opts: { sound: true, voice: false, vibe: true, ...obj(saved.opts) },
@@ -49,7 +50,7 @@ const plan = workout.items.map((it) => {
   return { ex, setupIndex: it.setup, setup, name: ex.name, unilateral: unilateralOf(ex, setup) };
 });
 
-const MODES = ['tabata', 'interval', 'workout'];
+const MODES = ['tabata', 'vollaard', 'interval', 'workout'];
 let mode = MODES.includes(linkParams.get('mode')) ? linkParams.get('mode')
   : fromLink ? 'workout' : MODES.includes(saved.mode) ? saved.mode : 'tabata';
 
@@ -60,6 +61,7 @@ let shownItem = null;
 
 function phasesFor() {
   if (mode === 'workout') return buildWorkout(plan, cfg.workout);
+  if (mode === 'vollaard') return buildVollaard(cfg.vollaard);
   return mode === 'tabata' ? buildTabata(cfg.tabata) : buildInterval(cfg.interval);
 }
 
@@ -148,7 +150,7 @@ const SIDE = { left: 'left side', right: 'right side' };
 function spokenFor(p) {
   if (p.kind === 'work' && mode === 'workout') return `${p.label}${p.side ? `, ${SIDE[p.side]}` : ''}`;
   if (p.kind === 'setRest' && mode === 'workout' && plan[p.item]) return `Rest. Next, ${plan[p.item].name}`;
-  return phaseText(p);
+  return p.say || phaseText(p);
 }
 
 function onPhase(_, p) {
@@ -179,6 +181,7 @@ function onPhase(_, p) {
 
 // ---------- render ----------
 function phaseText(p) {
+  if (p.title) return p.title;
   return { prep: 'Get ready', work: 'Work', rest: 'Rest', setRest: p.label, done: 'Done' }[p.kind] || p.label;
 }
 
@@ -189,6 +192,9 @@ function countText(p) {
     if (p.item !== undefined) parts.push(`${p.kind === 'work' || p.kind === 'rest' ? 'Exercise' : 'Up next'} ${p.item + 1}/${plan.length}`);
     if (p.kind === 'work' || p.kind === 'rest') parts.push(`Round ${p.round}/${p.rounds}`);
     if (p.sets > 1) parts.push(`Circuit ${p.set}/${p.sets}`);
+  } else if (mode === 'vollaard') {
+    if (p.kind === 'work') parts.push(`Sprint ${p.round}/${p.rounds}`);
+    if (p.kind === 'rest') parts.push(`Sprint ${p.round + 1}/${p.rounds} next`);
   } else {
     if (p.kind !== 'prep') parts.push(`Round ${p.round}/${p.rounds}`);
     if (p.sets > 1) parts.push(`${mode === 'tabata' ? 'Tabata' : 'Set'} ${p.set}/${p.sets}`);
@@ -352,7 +358,11 @@ checkVoices();
 if (synth) synth.addEventListener('voiceschanged', checkVoices);
 
 // ---------- settings form ----------
-const FIELDS = ['prep', 'work', 'rest', 'rounds', 'sets', 'setRest'];
+// form field name → setting, for the modes with a single config
+const FIELDS = { prep: 'prep', work: 'work', rest: 'rest', rounds: 'rounds', sets: 'sets', setRest: 'setRest' };
+const VFIELDS = { vprep: 'prep', vwork: 'work', vrest: 'rest', vrounds: 'rounds', vcool: 'coolDown' };
+const DEFAULTS = { tabata: TABATA_DEFAULTS, vollaard: VOLLAARD_DEFAULTS, interval: INTERVAL_DEFAULTS };
+const fieldsOf = (m) => (m === 'vollaard' ? VFIELDS : FIELDS);
 const WFIELDS = { wprep: ['prep'], exRest: ['exRest'], circuits: ['circuits'], circuitRest: ['circuitRest'], wwork: ['block', 'work'], wrest: ['block', 'rest'], wrounds: ['block', 'rounds'] };
 
 function fillForm() {
@@ -364,11 +374,11 @@ function fillForm() {
       el[name].value = path[0] === 'block' ? w[w.format][path[1]] : w[path[0]];
     }
   } else {
-    for (const f of FIELDS) el[f].value = cfg[mode][f];
+    for (const [name, key] of Object.entries(fieldsOf(mode))) el[name].value = cfg[mode][key];
   }
   $$('.setgrid').forEach((g) => { g.hidden = !g.dataset.for.split(' ').includes(mode); });
   $('[data-label-sets]').textContent = mode === 'tabata' ? 'Tabatas' : 'Sets';
-  $('#set-h').textContent = mode === 'tabata' ? 'Tabata settings' : mode === 'interval' ? 'Interval settings' : 'Workout settings';
+  $('#set-h').textContent = { tabata: 'Tabata', vollaard: 'Vollaard (REHIT)', interval: 'Interval', workout: 'Workout' }[mode] + ' settings';
 }
 
 function readForm() {
@@ -393,8 +403,8 @@ function readForm() {
     }
   } else {
     const raw = {};
-    for (const f of FIELDS) raw[f] = el[f].value;
-    cfg[mode] = clampConfig(raw, mode === 'tabata' ? TABATA_DEFAULTS : INTERVAL_DEFAULTS);
+    for (const [name, key] of Object.entries(fieldsOf(mode))) raw[key] = el[name].value;
+    cfg[mode] = clampConfig(raw, DEFAULTS[mode]);
   }
   saveCfg();
 }
@@ -417,8 +427,7 @@ setform.addEventListener('change', () => {
 });
 setform.addEventListener('submit', (e) => e.preventDefault());
 $('#defaults').addEventListener('click', () => {
-  if (mode === 'tabata') cfg.tabata = { ...TABATA_DEFAULTS };
-  else if (mode === 'interval') cfg.interval = { ...INTERVAL_DEFAULTS };
+  if (mode !== 'workout') cfg[mode] = { ...DEFAULTS[mode] };
   else cfg.workout = normWorkout({ format: cfg.workout.format });
   saveCfg();
   fillForm();
