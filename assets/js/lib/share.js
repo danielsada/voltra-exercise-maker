@@ -22,8 +22,8 @@ const pairs = (s) => (s ? s.split(',') : []).map((x) => {
 export function decodeProfile(str) {
   const q = new URLSearchParams(str.replace(/^#/, ''));
   if (!q.has('u')) return null;
-  const anchors = { pullup: false, high: 0, mid: 0, low: 0 };
-  for (const [id, n] of pairs(q.get('k'))) anchors[id] = id === 'pullup' ? n > 0 : n;
+  const anchors = { pullup: 0, high: 0, mid: 0, low: 0 };
+  for (const [id, n] of pairs(q.get('k'))) if (id in anchors) anchors[id] = n;
   return {
     units: Number(q.get('u')),
     platform: q.get('tp') === '1',
@@ -40,15 +40,25 @@ export function encodeWorkout(items, format) {
   return q.toString();
 }
 
+// null when the hash has no workout; { items: [] } when it has one but none of its exercises are known.
 export function decodeWorkout(str, exercises) {
   const q = new URLSearchParams(str.replace(/^#/, ''));
-  if (!q.get('w')) return null;
-  const items = [];
-  for (const [id, n] of pairs(q.get('w'))) {
-    const ex = exercises.find((e) => e.id === id);
-    if (!ex) continue;
-    const setup = Number.isInteger(n) && n >= 0 && n < ex.setups.length ? n : 0;
-    items.push({ id, setup });
-  }
-  return items.length ? { items, format: q.get('f') === 'interval' ? 'interval' : 'tabata' } : null;
+  if (!q.has('w')) return null;
+  const items = normalizeItems(pairs(q.get('w')).map(([id, setup]) => ({ id, setup })), exercises);
+  return { items, format: q.get('f') === 'interval' ? 'interval' : 'tabata' };
 }
+
+// Keep only well-formed items for known exercises (saved data may be stale or hand-edited).
+export function normalizeItems(items, exercises) {
+  if (!Array.isArray(items)) return [];
+  const out = [];
+  for (const it of items) {
+    const ex = it && typeof it.id === 'string' ? exercises.find((e) => e.id === it.id) : null;
+    if (!ex || out.some((o) => o.id === ex.id)) continue;
+    const n = Number(it.setup);
+    out.push({ id: ex.id, setup: Number.isInteger(n) && n >= 0 && n < ex.setups.length ? n : 0 });
+  }
+  return out;
+}
+
+export const normalizeFormat = (f) => (f === 'interval' ? 'interval' : 'tabata');

@@ -3,22 +3,27 @@ import * as P from '@params';
 import { normalizeProfile, defaultProfile, availableExercises, closestSetup, describeMissing, describeSetup, HEIGHTS } from './lib/equipment.js';
 import { compose, swap, newSeed } from './lib/compose.js';
 import { buildWorkout, totalSeconds } from './lib/timeline.js';
-import { encodeProfile, decodeProfile, encodeWorkout } from './lib/share.js';
-import { store, $, $$, figureSVG, mountFigure, anchorDemo, unilateralOf, copyText } from './lib/ui.js';
+import { encodeProfile, decodeProfile, encodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
+import { store, $, $$, figureSVG, mountFigure, anchorDemo, unilateralOf, showEachSide, copyText } from './lib/ui.js';
 
 const eq = P.equipment;
 const exercises = P.exercises;
 const exById = new Map(exercises.map((e) => [e.id, e]));
 const form = $('#eqform');
 
+const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+
 // ---------- profile ----------
-let profile = normalizeProfile(decodeProfile(location.hash) || store.get('profile') || defaultProfile(), eq);
+// A shared setup (#u=…) is only previewed: it isn't saved over yours until you change something or keep it.
+const linked = decodeProfile(location.hash);
+const savedProfile = store.get('profile');
+let viewingLink = Boolean(linked);
+let profile = normalizeProfile(linked || savedProfile || defaultProfile(), eq);
 let available = new Map();
 
 function writeForm() {
   form.elements.units.value = String(profile.units);
   form.elements.platform.checked = profile.platform;
-  form.elements['anchor-pullup'].checked = profile.anchors.pullup;
   for (const h of HEIGHTS) {
     form.elements[`anchor-${h}`].checked = profile.anchors[h] > 0;
     form.elements[`two-${h}`].checked = profile.anchors[h] > 1;
@@ -33,7 +38,7 @@ function writeForm() {
 
 function readForm() {
   const units = Number(form.elements.units.value) || 1;
-  const p = { units, platform: form.elements.platform.checked, attachments: {}, anchors: { pullup: form.elements['anchor-pullup'].checked } };
+  const p = { units, platform: form.elements.platform.checked, attachments: {}, anchors: {} };
   for (const h of HEIGHTS) {
     const on = form.elements[`anchor-${h}`].checked;
     p.anchors[h] = on ? (units === 2 && form.elements[`two-${h}`].checked ? 2 : 1) : 0;
@@ -53,15 +58,16 @@ function syncFormState() {
   }
   $$('.anc').forEach((li) => {
     const a = li.dataset.anchor;
-    const units = two && (a === 'pullup' || profile.anchors[a] > 1) ? 2 : 1;
+    const units = two && profile.anchors[a] > 1 ? 2 : 1;
     mountFigure($('.anc__fig', li), anchorDemo(a, units, exercises, eq));
-    const on = a === 'platform' ? profile.platform : a === 'pullup' ? profile.anchors.pullup : profile.anchors[a] > 0;
+    const on = a === 'platform' ? profile.platform : profile.anchors[a] > 0;
     li.classList.toggle('is-on', on);
   });
 }
 
 function onProfile() {
-  store.set('profile', profile);
+  if (!viewingLink) store.set('profile', profile);
+  $('#eqlink').hidden = !viewingLink;
   if (location.hash.includes('u=')) history.replaceState(null, '', location.pathname + location.search);
   available = availableExercises(exercises, profile, eq);
   syncFormState();
@@ -71,7 +77,19 @@ function onProfile() {
 }
 
 form.addEventListener('change', () => {
+  viewingLink = false;
   profile = readForm();
+  onProfile();
+});
+$('#eqkeep').addEventListener('click', () => {
+  viewingLink = false;
+  onProfile();
+  saveWork();
+});
+$('#eqmine').addEventListener('click', () => {
+  viewingLink = false;
+  profile = normalizeProfile(savedProfile || defaultProfile(), eq);
+  writeForm();
   onProfile();
 });
 
@@ -122,7 +140,8 @@ function renderLibrary() {
     renderSetupList(li, ex, best);
     $('.ex__add', li).disabled = !ok;
     const idx = ok ? best : closestSetup(ex, profile, eq).index;
-    mountFigure($('.ex__fig', li), figureSVG(ex, idx, eq));
+    mountFigure($('.ex__fig', li), figureSVG(ex, idx, eq, { profile }));
+    showEachSide(li, ex, ex.setups[idx]);
     if (ok || lib.missing) {
       counts.all += 1;
       counts[`region:${ex.region}`] = (counts[`region:${ex.region}`] || 0) + 1;
@@ -169,22 +188,48 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- workout ----------
 const coform = $('#coform');
-const work = { items: [], format: 'tabata', focus: 'full', count: 6, ...(store.get('workout') || {}) };
-work.items = (work.items || []).filter((i) => exById.has(i.id));
+const storedWork = obj(store.get('workout'));
+const FOCI = [...coform.elements.focus.options].map((o) => o.value);
+const work = {
+  items: normalizeItems(storedWork.items, exercises),
+  format: normalizeFormat(storedWork.format),
+  focus: FOCI.includes(storedWork.focus) ? storedWork.focus : 'full',
+  count: Math.min(12, Math.max(2, Number(storedWork.count) || 6)),
+};
 const sprite = (document.querySelector('svg.i use') || { getAttribute: () => '' }).getAttribute('href').split('#')[0];
 
 const saveWork = () => store.set('workout', work);
+const say = (msg) => { $('#workstatus').textContent = msg; };
+const nameOf = (id) => exById.get(id).name;
 
+// Keep each exercise on the setup that fits the current equipment (and save it, so the timer gets it too).
 function refreshWorkout() {
+  let changed = false;
   for (const it of work.items) {
-    if (available.has(it.id)) it.setup = available.get(it.id);
+    if (available.has(it.id) && it.setup !== available.get(it.id)) {
+      it.setup = available.get(it.id);
+      changed = true;
+    }
   }
+  if (changed && !viewingLink) saveWork();
   renderWorkout();
 }
 
 let fresh = new Set(); // ids to animate in on the next render (just added or composed)
 
-function renderWorkout() {
+// Rebuilding the list destroys the focused button; `keep` = { index, act } puts focus back on the same control.
+function restoreFocus(keep) {
+  const rows = $$('#worklist > li');
+  if (!rows.length) {
+    $('#pw-h').focus();
+    return;
+  }
+  const li = rows[Math.min(keep.index, rows.length - 1)];
+  const b = $(`[data-act="${keep.act}"]`, li);
+  (b && !b.disabled ? b : $('[data-act="swap"]', li)).focus();
+}
+
+function renderWorkout(keep) {
   const list = $('#worklist');
   list.innerHTML = '';
   work.items.forEach((it, i) => {
@@ -194,24 +239,43 @@ function renderWorkout() {
     const li = document.createElement('li');
     li.className = `wi${ok ? '' : ' is-missing'}${fresh.has(it.id) ? ' is-new' : ''}`;
     li.innerHTML = '<div class="wi__fig" aria-hidden="true"></div><div class="wi__body"><b class="wi__name"></b><small class="wi__setup"></small></div>'
-      + `<div class="wi__acts"><button type="button" class="tool" data-act="swap" title="Swap for a similar exercise"><svg class="i" aria-hidden="true"><use href="${sprite}#swap"/></svg><span class="sr-only">Swap</span></button>`
-      + '<button type="button" class="tool" data-act="up" title="Move up" aria-label="Move up">↑</button>'
-      + '<button type="button" class="tool" data-act="remove" title="Remove" aria-label="Remove">✕</button></div>';
+      + `<div class="wi__acts"><button type="button" class="tool" data-act="swap"><svg class="i" aria-hidden="true"><use href="${sprite}#swap"/></svg></button>`
+      + '<button type="button" class="tool" data-act="up">↑</button>'
+      + '<button type="button" class="tool" data-act="remove">✕</button></div>';
     $('.wi__name', li).textContent = `${i + 1}. ${ex.name}${unilateralOf(ex, setup) ? ' (each side)' : ''}`;
-    $('.wi__setup', li).textContent = ok ? describeSetup(setup, eq) : 'Not possible with your current equipment';
+    $('.wi__setup', li).textContent = ok ? describeSetup(setup, eq) : 'Not possible with your equipment: swap or remove it';
+    for (const [act, label] of [['swap', `Swap ${ex.name} for a similar exercise`], ['up', `Move ${ex.name} up`], ['remove', `Remove ${ex.name}`]]) {
+      const b = $(`[data-act="${act}"]`, li);
+      b.setAttribute('aria-label', label);
+      b.title = label;
+    }
     $('[data-act="up"]', li).disabled = i === 0;
-    mountFigure($('.wi__fig', li), figureSVG(ex, it.setup, eq));
+    mountFigure($('.wi__fig', li), figureSVG(ex, it.setup, eq, { profile }));
     li.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]');
       if (!b) return;
-      if (b.dataset.act === 'remove') work.items.splice(i, 1);
-      if (b.dataset.act === 'up' && i > 0) [work.items[i - 1], work.items[i]] = [work.items[i], work.items[i - 1]];
-      if (b.dataset.act === 'swap') {
+      const act = b.dataset.act;
+      let index = i;
+      if (act === 'remove') {
+        work.items.splice(i, 1);
+        say(`Removed ${ex.name}.`);
+      }
+      if (act === 'up' && i > 0) {
+        [work.items[i - 1], work.items[i]] = [work.items[i], work.items[i - 1]];
+        index = i - 1;
+        say(`Moved ${ex.name} to position ${i}.`);
+      }
+      if (act === 'swap') {
         work.items = swap(work.items, i, exercises, available, newSeed());
-        fresh = new Set([work.items[i].id]);
+        const now = work.items[i].id;
+        if (now === it.id) say(`Nothing else fits in place of ${ex.name}.`);
+        else {
+          fresh = new Set([now]);
+          say(`Swapped ${ex.name} for ${nameOf(now)}.`);
+        }
       }
       saveWork();
-      renderWorkout();
+      renderWorkout({ index, act });
     });
     list.append(li);
   });
@@ -219,6 +283,7 @@ function renderWorkout() {
   const has = work.items.length > 0;
   const n = work.items.length;
   const label = `${n} exercise${n === 1 ? '' : 's'}`;
+  const blocked = work.items.filter((it) => !available.has(it.id)).length;
   $('#workempty').hidden = has;
   $('#workactions').hidden = !has;
   $('#workcount').textContent = has ? label : '';
@@ -234,17 +299,33 @@ function renderWorkout() {
   $('#workfab').hidden = !has;
   if (has) {
     const start = $('#workstart');
-    start.href = `${start.href.split('#')[0]}#${encodeWorkout(work.items, work.format)}`;
-    $('#fabstart').href = start.href;
+    const fab = $('#fabstart');
+    const href = `${start.href.split('#')[0]}#${encodeWorkout(work.items, work.format)}`;
+    // Don't send exercises the equipment no longer allows to the timer.
+    for (const a of [start, fab]) {
+      a.href = href;
+      a.classList.toggle('is-disabled', blocked > 0);
+      if (blocked) a.setAttribute('aria-disabled', 'true');
+      else a.removeAttribute('aria-disabled');
+    }
     $('#fabcount').textContent = label;
-    $('#fabnames').textContent = work.items.map((it) => exById.get(it.id).name).join(' · ');
-    const timer = store.get('timer') || {};
+    $('#fabnames').textContent = work.items.map((it) => nameOf(it.id)).join(' · ');
+    const timer = obj(store.get('timer'));
     const phases = buildWorkout(work.items.map((it) => {
       const ex = exById.get(it.id);
       return { name: ex.name, unilateral: unilateralOf(ex, ex.setups[it.setup]) };
-    }), { ...(timer.workout || {}), format: work.format });
-    $('#worktime').textContent = `About ${Math.round(totalSeconds(phases) / 60)} min`;
+    }), { ...obj(timer.workout), format: work.format });
+    $('#worktime').textContent = blocked
+      ? `Swap or remove ${blocked === 1 ? 'the exercise' : `the ${blocked} exercises`} your equipment doesn't allow first.`
+      : `About ${Math.round(totalSeconds(phases) / 60)} min`;
+    $('#worktime').classList.toggle('is-warn', blocked > 0);
   }
+  if (keep) restoreFocus(keep);
+}
+for (const a of [$('#workstart'), $('#fabstart')]) {
+  a.addEventListener('click', (e) => {
+    if (a.getAttribute('aria-disabled') === 'true') e.preventDefault();
+  });
 }
 
 coform.elements.focus.value = work.focus;
@@ -261,12 +342,13 @@ coform.addEventListener('submit', (e) => {
   fresh = new Set(work.items.map((it) => it.id));
   saveWork();
   renderWorkout();
+  say(work.items.length ? `Composed ${work.items.length} exercises: ${work.items.map((it) => nameOf(it.id)).join(', ')}.` : '');
   if (!work.items.length) $('#workempty').textContent = 'Nothing fits your equipment yet. Add an anchor point or a handle above.';
   else if (!drawerMode()) showWorkout();
 });
 coform.addEventListener('change', (e) => {
   if (e.target.name === 'format') {
-    work.format = e.target.value;
+    work.format = normalizeFormat(e.target.value);
     saveWork();
     renderWorkout();
   }
@@ -274,7 +356,8 @@ coform.addEventListener('change', (e) => {
 $('#workclear').addEventListener('click', () => {
   work.items = [];
   saveWork();
-  renderWorkout();
+  renderWorkout({ index: 0, act: 'swap' });
+  say('Workout cleared.');
 });
 $('#exlist').addEventListener('click', (e) => {
   const b = e.target.closest('[data-add]');
@@ -283,9 +366,11 @@ $('#exlist').addEventListener('click', (e) => {
   const at = work.items.findIndex((i) => i.id === id);
   if (at >= 0) {
     work.items.splice(at, 1);
+    say(`Removed ${nameOf(id)}.`);
   } else {
     work.items.push({ id, setup: available.get(id) });
     fresh = new Set([id]);
+    say(`Added ${nameOf(id)}. ${work.items.length} in your workout.`);
   }
   saveWork();
   renderWorkout();

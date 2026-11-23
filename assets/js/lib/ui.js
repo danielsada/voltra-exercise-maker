@@ -24,7 +24,7 @@ export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 export function figureSVG(ex, setupIndex, eq, opts = {}) {
   const setup = ex.setups[setupIndex] || ex.setups[0];
-  return renderFigure({ figure: ex.figure, setup, gear: gearFor(setup, eq), title: opts.title || '', animate: opts.animate !== false });
+  return renderFigure({ figure: ex.figure, setup, gear: gearFor(setup, eq, opts.profile), title: opts.title || '', animate: opts.animate !== false });
 }
 
 // SMIL keeps running off-screen; pause figures that aren't visible.
@@ -60,6 +60,12 @@ export function anchorDemo(anchor, units, exercises, eq) {
   if (!ex) return '';
   const i = ex.setups.findIndex((s) => s.anchor === anchor && (s.units || 1) === units);
   return i < 0 ? '' : figureSVG(ex, i, eq);
+}
+
+// "each side" depends on the setup too (e.g. a one-arm raise becomes both arms with two Voltras).
+export function showEachSide(li, ex, setup) {
+  const tag = li.querySelector('.ex__each');
+  if (tag) tag.hidden = !unilateralOf(ex, setup);
 }
 
 export function unilateralOf(ex, setup) {

@@ -2,8 +2,9 @@
   too). Filled in by assets/js/composer-page.js. Context: the page. */ -}}
 {{- $timer := site.GetPage "/timer" -}}
 <section class="appnav pw js-only" id="workout" aria-labelledby="pw-h">
-  <h2 class="ph pw__h" id="pw-h"><span>Your workout</span><span class="pw__count" id="workcount"></span></h2>
-  <ol class="pw__list" id="worklist" aria-live="polite"></ol>
+  <h2 class="ph pw__h" id="pw-h" tabindex="-1"><span>Your workout</span><span class="pw__count" id="workcount"></span></h2>
+  <ol class="pw__list" id="worklist"></ol>
+  <p class="sr-only" id="workstatus" role="status"></p>
   <p class="pw__empty" id="workempty">Add exercises from the list, or press <b>Compose</b>.</p>
   <div class="pw__acts" id="workactions" hidden>
     <a class="btn btn--accent pw__start" id="workstart" href="{{ $timer.RelPermalink }}">{{ partial "breeze/icon.html" "play" }}<span>Start in timer</span></a>

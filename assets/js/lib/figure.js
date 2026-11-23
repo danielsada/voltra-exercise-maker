@@ -16,6 +16,8 @@
 //   abduct/elbow (both arms, mirrored) or abductL/elbowL/abductR/elbowR, leg2 (right leg out to the side),
 //   reach + ext: both hands together at angle `reach` from straight down (+ toward image right), ext = 0..1 of arm length.
 
+import { ownedCount } from './equipment.js';
+
 export const L = { torso: 46, neck: 6, head: 9, upper: 26, fore: 24, thigh: 38, shin: 38, foot: 11, hipW: 8, shW: 12 };
 export const GROUND = 186;
 const SIZE = 200;
@@ -261,8 +263,11 @@ export const GEAR = {
   handle: 'handle', bar1: 'bar', bar2: 'bar',
 };
 
-export function gearFor(setup, eq) {
-  const tok = (setup && setup.attach && setup.attach[0]) || '';
+// Draw the attachment you'd actually use: the first alternative you own (with a profile), else the first listed.
+export function gearFor(setup, eq, profile) {
+  const list = (setup && setup.attach) || [];
+  const owned = profile && eq ? list.find((t) => ownedCount(profile, eq, t) > 0) : null;
+  const tok = owned || list[0] || '';
   if (GEAR[tok]) return GEAR[tok];
   const a = eq && eq.attachments.find((x) => x.id === tok);
   return (a && a.gear) || 'handle';
@@ -289,8 +294,11 @@ function frame(fig, pose, ctx) {
     else ends = [mid(handL, handR)];
     if (fig.cross && ends.length === 2) ends.reverse();
     if (gear === 'bar') {
-      const a = units === 2 && r.units.length === 2 ? handL : sub(mid(handL, handR), [16, 0]);
-      const b = units === 2 && r.units.length === 2 ? handR : add(mid(handL, handR), [16, 0]);
+      // a two-Voltra bar spans the hands; when the hands meet (close-grip moves) draw a short bar instead
+      const span = units === 2 && r.units.length === 2 && Math.hypot(handR[0] - handL[0], handR[1] - handL[1]) >= 8;
+      const a = span ? handL : sub(mid(handL, handR), [16, 0]);
+      const b = span ? handR : add(mid(handL, handR), [16, 0]);
+      if (units === 2 && r.units.length === 2 && !span) ends = [a, b];
       const v = sub(b, a);
       const n = Math.hypot(v[0], v[1]) || 1;
       const ext = [(v[0] / n) * 9, (v[1] / n) * 9];

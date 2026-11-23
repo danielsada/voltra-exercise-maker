@@ -38,11 +38,13 @@ export class Engine {
   }
 
   toggle() {
+    if (this.phases.length <= 1) return;
     if (this.running) this.pause();
     else this.start();
   }
 
-  go(index) {
+  go(index, silent = false) {
+    if (this.phases.length <= 1) return; // nothing to run (e.g. an empty workout)
     const last = this.phases.length - 1;
     this.index = Math.min(last, Math.max(0, index));
     this.offset = 0;
@@ -53,7 +55,7 @@ export class Engine {
     } else {
       this.done = false;
     }
-    this.onPhase(this.index, this.phase);
+    if (!silent) this.onPhase(this.index, this.phase);
   }
 
   skip() {
@@ -67,17 +69,20 @@ export class Engine {
     return this.go(this.index - 1);
   }
 
-  // Advance through any phases whose time has passed. Returns a snapshot.
+  // Advance through any phases whose time has passed (after a throttled or hidden tab, maybe several at once),
+  // then announce only the phase we land on. Returns a snapshot.
   update() {
     if (this.running) {
       let e = this.elapsed();
+      const from = this.index;
       while (!this.done && e >= this.phase.seconds * 1000) {
         e -= this.phase.seconds * 1000;
         const t = this.now();
-        this.go(this.index + 1);
+        this.go(this.index + 1, true);
         this.offset = this.done ? 0 : e;
         this.anchor = t;
       }
+      if (this.index !== from) this.onPhase(this.index, this.phase);
     }
     return this.snapshot();
   }

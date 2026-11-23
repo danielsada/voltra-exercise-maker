@@ -2,14 +2,23 @@
 // Pure functions: no DOM, no globals. `eq` is the equipment data from data/equipment.yaml.
 
 export const ANCHORS = ['pullup', 'high', 'mid', 'low', 'platform'];
-export const HEIGHTS = ['high', 'mid', 'low'];
+// Anchors that take a number of points (0, 1, or 2 = room for both Voltras side by side).
+export const HEIGHTS = ['pullup', 'high', 'mid', 'low'];
+
+// Attachment ids from earlier versions of the site → their current id.
+const RENAMED = {
+  'carbon-bar-premium-grip': 'single-bar',
+  'alumacore-bar': 'single-bar',
+  'fusioncore-bar': 'single-bar',
+  'alumacore-fusioncore': 'single-bar',
+};
 
 export function defaultProfile() {
   return {
     units: 1,
     platform: false,
     attachments: { 'basic-handle': 1 },
-    anchors: { pullup: false, high: 0, mid: 1, low: 1 },
+    anchors: { pullup: 0, high: 0, mid: 1, low: 1 },
   };
 }
 
@@ -24,15 +33,21 @@ export function normalizeProfile(p, eq) {
   const src = p && typeof p === 'object' ? p : {};
   const units = clampInt(src.units, 1, 2, d.units);
   const out = { units, platform: Boolean(src.platform), attachments: {}, anchors: {} };
-  const atts = src.attachments && typeof src.attachments === 'object' ? src.attachments : d.attachments;
+  const raw = src.attachments && typeof src.attachments === 'object' ? src.attachments : d.attachments;
+  const atts = {};
+  for (const [id, q] of Object.entries(raw)) {
+    const to = RENAMED[id] || id;
+    atts[to] = Math.max(clampInt(atts[to], 0, 2, 0), clampInt(q, 0, 2, 0));
+  }
   for (const a of eq.attachments) {
     const max = a.count === 'qty' ? 2 : 1;
     const q = clampInt(atts[a.id], 0, max, 0);
     if (q > 0) out.attachments[a.id] = q;
   }
   const anc = src.anchors && typeof src.anchors === 'object' ? src.anchors : d.anchors;
-  out.anchors.pullup = Boolean(anc.pullup);
-  for (const h of HEIGHTS) out.anchors[h] = Math.min(clampInt(anc[h], 0, 2, 0), units);
+  // Earlier versions stored the pull-up bar as true/false, and true meant room for both Voltras.
+  const pull = anc.pullup === true ? 2 : anc.pullup;
+  for (const h of HEIGHTS) out.anchors[h] = Math.min(clampInt(h === 'pullup' ? pull : anc[h], 0, 2, 0), units);
   return out;
 }
 
@@ -48,9 +63,8 @@ export function ownedCount(profile, eq, token) {
   return n;
 }
 
-// Anchor points available at a given anchor. A pull-up bar holds both Voltras; the Travel Platform holds one.
+// Anchor points available at a given anchor. The Travel Platform holds one Voltra.
 export function anchorPoints(profile, anchor) {
-  if (anchor === 'pullup') return profile.anchors.pullup ? 2 : 0;
   if (anchor === 'platform') return profile.platform ? 1 : 0;
   return profile.anchors[anchor] || 0;
 }

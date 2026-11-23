@@ -67,7 +67,7 @@ anchors:
     icon: pullup
     desc: A pull-up bar or overhead point you can stand or kneel under (lat pulldowns).
     need: a pull-up bar
-    need2: a pull-up bar
+    need2: a pull-up bar with room for both Voltras
   - id: high
     name: Overhead height
     short: Overhead

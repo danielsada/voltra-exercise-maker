@@ -2,7 +2,7 @@
 import * as P from '@params';
 import { Engine } from './lib/engine.js';
 import { TABATA_DEFAULTS, INTERVAL_DEFAULTS, WORKOUT_DEFAULTS, buildTabata, buildInterval, buildWorkout, clampConfig, totalSeconds, formatTime } from './lib/timeline.js';
-import { decodeWorkout } from './lib/share.js';
+import { decodeWorkout, normalizeItems, normalizeFormat } from './lib/share.js';
 import { describeSetup } from './lib/equipment.js';
 import { store, $, $$, figureSVG, unilateralOf } from './lib/ui.js';
 
@@ -14,40 +14,44 @@ const setform = $('#setform');
 const sprite = ($('svg.i use') || { getAttribute: () => '' }).getAttribute('href').split('#')[0];
 
 // ---------- settings ----------
-function normWorkout(w = {}) {
+const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+function normWorkout(raw) {
+  const w = obj(raw);
   const base = clampConfig(w, { prep: WORKOUT_DEFAULTS.prep, exRest: WORKOUT_DEFAULTS.exRest, circuits: WORKOUT_DEFAULTS.circuits, circuitRest: WORKOUT_DEFAULTS.circuitRest });
   return {
     ...base,
-    format: w.format === 'interval' ? 'interval' : 'tabata',
-    tabata: clampConfig(w.tabata, WORKOUT_DEFAULTS.tabata),
-    interval: clampConfig(w.interval, WORKOUT_DEFAULTS.interval),
+    format: normalizeFormat(w.format),
+    tabata: clampConfig(obj(w.tabata), WORKOUT_DEFAULTS.tabata),
+    interval: clampConfig(obj(w.interval), WORKOUT_DEFAULTS.interval),
   };
 }
-const saved = store.get('timer') || {};
+const saved = obj(store.get('timer'));
 const cfg = {
-  tabata: clampConfig(saved.tabata, TABATA_DEFAULTS),
-  interval: clampConfig(saved.interval, INTERVAL_DEFAULTS),
+  tabata: clampConfig(obj(saved.tabata), TABATA_DEFAULTS),
+  interval: clampConfig(obj(saved.interval), INTERVAL_DEFAULTS),
   workout: normWorkout(saved.workout),
-  opts: { sound: true, voice: false, vibe: true, ...(saved.opts || {}) },
+  opts: { sound: true, voice: false, vibe: true, ...obj(saved.opts) },
 };
 const saveCfg = () => store.set('timer', { ...cfg, mode });
 
-// ---------- workout items: from the link (#w=…) or from the composer ----------
-let workout = decodeWorkout(location.hash, exercises);
-if (workout) {
-  cfg.workout.format = workout.format;
-} else {
-  const w = store.get('workout');
-  const items = ((w && w.items) || []).filter((i) => exById.has(i.id));
-  workout = { items, format: (w && w.format) || cfg.workout.format };
-}
+// ---------- workout items: from a link (#w=…) or from the composer (saved in this browser) ----------
+// A link's workout stays in the URL (next to #mode=…) so switching modes and reloading keeps it.
+const linkParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+const fromLink = decodeWorkout(location.hash, exercises);
+let linkPart = fromLink ? new URLSearchParams({ w: linkParams.get('w'), f: fromLink.format }).toString() : '';
+const savedWork = obj(store.get('workout'));
+const workout = fromLink || { items: normalizeItems(savedWork.items, exercises), format: normalizeFormat(savedWork.format || cfg.workout.format) };
+cfg.workout.format = workout.format;
+const badLink = Boolean(fromLink && !fromLink.items.length);
 const plan = workout.items.map((it) => {
   const ex = exById.get(it.id);
   const setup = ex.setups[it.setup] || ex.setups[0];
   return { ex, setupIndex: it.setup, setup, name: ex.name, unilateral: unilateralOf(ex, setup) };
 });
 
-let mode = /w=/.test(location.hash) ? 'workout' : (location.hash.match(/mode=(tabata|interval|workout)/) || [])[1] || saved.mode || 'tabata';
+const MODES = ['tabata', 'interval', 'workout'];
+let mode = MODES.includes(linkParams.get('mode')) ? linkParams.get('mode')
+  : fromLink ? 'workout' : MODES.includes(saved.mode) ? saved.mode : 'tabata';
 
 // ---------- engine ----------
 let engine;
@@ -115,18 +119,28 @@ function speak(text) {
   synth.speak(u);
 }
 
+// The screen stays on while the timer runs. `wantLock` is the latest wish, so a request that resolves after a pause
+// is released straight away.
 let lock = null;
+let wantLock = false;
+let requesting = false;
 async function wake(on) {
+  wantLock = on;
   try {
-    if (on && !lock && 'wakeLock' in navigator && document.visibilityState === 'visible') {
-      lock = await navigator.wakeLock.request('screen');
-      lock.addEventListener('release', () => { lock = null; });
+    if (on && !lock && !requesting && 'wakeLock' in navigator && document.visibilityState === 'visible') {
+      requesting = true;
+      const l = await navigator.wakeLock.request('screen');
+      requesting = false;
+      l.addEventListener('release', () => { if (lock === l) lock = null; });
+      if (wantLock) lock = l;
+      else await l.release();
     } else if (!on && lock) {
-      await lock.release();
+      const l = lock;
       lock = null;
+      await l.release();
     }
   } catch {
-    lock = null;
+    requesting = false;
   }
 }
 
@@ -198,7 +212,7 @@ function renderExercise(p) {
     $('#excue').textContent = it.ex.cue || '';
   }
   const side = p.side ? SIDE[p.side][0].toUpperCase() + SIDE[p.side].slice(1) : (it.unilateral ? 'Each side' : '');
-  $('#exside').textContent = p.kind === 'work' || p.kind === 'rest' ? side : `Up next${side ? ` · ${side}` : ''}`;
+  $('#exside').textContent = p.kind === 'work' ? side : `Up next${side ? ` · ${side}` : ''}`;
   const svg = $('#exfig svg');
   if (svg && svg.pauseAnimations) {
     if (p.kind === 'work' && engine.running) svg.unpauseAnimations();
@@ -224,14 +238,15 @@ function render() {
   const s = engine.update();
   const p = s.phase;
   const idle = pristine();
-  stage.dataset.phase = s.done ? 'done' : idle ? 'idle' : p.kind;
+  const empty = engine.phases.length <= 1;
+  stage.dataset.phase = idle || empty ? 'idle' : s.done ? 'done' : p.kind;
   stage.classList.toggle('is-paused', !s.running && !idle && !s.done);
   const sec = s.done ? 0 : Math.ceil(s.remaining / 1000);
   $('#phase').textContent = idle ? (mode === 'workout' && !plan.length ? 'No workout' : 'Ready') : phaseText(p);
   $('#time').textContent = formatTime(idle ? p.seconds : sec);
   $('#count').textContent = countText(p);
   const total = totalSeconds(engine.phases);
-  $('#ringfill').style.strokeDashoffset = String(Math.round(1000 * (1 - (s.done ? 1 : s.progress))));
+  $('#ringfill').style.strokeDashoffset = String(Math.round(1000 * (1 - (idle || empty ? 0 : s.done ? 1 : s.progress))));
   $('#totalbar').style.width = `${total ? (100 * s.totalElapsed) / (total * 1000) : 0}%`;
   $('#elapsed').textContent = formatTime(s.totalElapsed / 1000);
   $('#remaining').textContent = formatTime(s.totalRemaining / 1000);
@@ -244,10 +259,11 @@ function render() {
   lastSec = sec;
   renderExercise(p);
   renderPlan(p);
-  if (s.done) setGo('reset', 'Again');
+  if (idle || empty) setGo('play', 'Start');
+  else if (s.done) setGo('reset', 'Again');
   else if (s.running) setGo('pause', 'Pause');
-  else setGo('play', idle ? 'Start' : 'Resume');
-  $('#go').disabled = engine.phases.length <= 1;
+  else setGo('play', 'Resume');
+  for (const id of ['#go', '#back', '#skip', '#reset']) $(id).disabled = empty;
   document.title = s.running ? `${formatTime(sec)} ${phaseText(p)} · Timer` : baseTitle;
   return s;
 }
@@ -258,21 +274,32 @@ function loop() {
   const s = render();
   raf = s.running ? requestAnimationFrame(loop) : 0;
 }
+// Browsers don't run animation frames in a hidden tab; a coarse interval keeps the cues coming (throttled to
+// about once a second, which the beeps tolerate).
+let ticker = 0;
 function kick() {
   if (!raf) raf = requestAnimationFrame(loop);
+  if (!ticker) {
+    ticker = setInterval(() => {
+      if (!engine.running) { clearInterval(ticker); ticker = 0; return; }
+      if (document.hidden) render();
+    }, 250);
+  }
 }
 
 // ---------- controls ----------
 function toggle() {
+  if (engine.phases.length <= 1) return;
   audio();
   if (engine.done) {
     build();
     engine.start();
     onPhase(0, engine.phase);
   } else {
-    const first = pristine();
+    // starting at the very beginning of a phase (also after Skip/Back while paused) gets its cues
+    const atStart = !engine.running && engine.elapsed() === 0;
     engine.toggle();
-    if (first && engine.running) onPhase(0, engine.phase);
+    if (atStart && engine.running) onPhase(engine.index, engine.phase);
   }
   wake(engine.running);
   render();
@@ -349,7 +376,13 @@ function readForm() {
   if (mode === 'workout') {
     const w = cfg.workout;
     const fmtChanged = el.format.value !== w.format;
-    w.format = el.format.value === 'interval' ? 'interval' : 'tabata';
+    w.format = normalizeFormat(el.format.value);
+    // keep the composer's saved workout in step, so the format sticks next time
+    if (fmtChanged && !fromLink) store.set('workout', { ...savedWork, items: workout.items, format: w.format });
+    if (fmtChanged && fromLink) {
+      linkPart = new URLSearchParams({ w: linkParams.get('w'), f: w.format }).toString();
+      history.replaceState(null, '', `${location.pathname}#mode=${mode}&${linkPart}`);
+    }
     if (!fmtChanged) {
       const raw = { ...w, tabata: { ...w.tabata }, interval: { ...w.interval } };
       for (const [name, path] of Object.entries(WFIELDS)) {
@@ -369,6 +402,10 @@ function readForm() {
 function noteFor() {
   const parts = [`Total ${formatTime(totalSeconds(phasesFor()))}`];
   if (!pristine()) parts.push('changes apply when you reset');
+  const w = cfg.workout;
+  if (mode === 'workout' && w.format === 'tabata' && plan.some((it) => it.unilateral) && (w.tabata.rounds * w.circuits) % 2) {
+    parts.push('one-sided exercises alternate sides each round, so with an odd number of rounds one side gets an extra round');
+  }
   $('#setnote').textContent = `${parts.join(' · ')}.`;
 }
 
@@ -385,7 +422,7 @@ $('#defaults').addEventListener('click', () => {
   else cfg.workout = normWorkout({ format: cfg.workout.format });
   saveCfg();
   fillForm();
-  build();
+  if (pristine()) build();
   noteFor();
 });
 
@@ -403,6 +440,7 @@ function renderPlanList() {
     list.append(li);
   });
   $('#planempty').hidden = plan.length > 0;
+  if (badLink) $('#planempty').textContent = "This workout link doesn't contain any exercise this site knows. It may be from an older version; compose a new one.";
   $('#planedit').hidden = !plan.length;
 }
 
@@ -413,8 +451,7 @@ function setMode(m, fromUser) {
   $('#plan').hidden = m !== 'workout';
   if (fromUser) {
     saveCfg();
-    const keep = m === 'workout' && /w=/.test(location.hash) ? location.hash : `#mode=${m}`;
-    history.replaceState(null, '', location.pathname + keep);
+    history.replaceState(null, '', `${location.pathname}#mode=${m}${linkPart ? `&${linkPart}` : ''}`);
   }
   fillForm();
   build();

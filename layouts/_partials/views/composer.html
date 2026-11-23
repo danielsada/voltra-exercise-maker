@@ -17,6 +17,8 @@
 
   <section class="card vx-equip" aria-labelledby="eq-h">
     <div class="card-h"><h2 id="eq-h">Your equipment</h2><button type="button" class="tool js-only" id="eq-share">{{ partial "breeze/icon.html" "link" }}<span>Copy link</span></button></div>
+    <p class="eqlink js-only" id="eqlink" hidden>You're looking at a shared setup. It isn't saved over yours until you change something.
+      <button type="button" class="tool" id="eqkeep">Keep this setup</button><button type="button" class="tool tool--plain" id="eqmine">Use my saved setup</button></p>
     <form id="eqform" class="eqform" autocomplete="off">
       <fieldset class="eqf eqf--units">
         <legend>Voltras</legend>
@@ -35,8 +37,8 @@
             <span class="anc__txt">
               <label class="chk"><input type="checkbox" name="{{ cond (eq .id "platform") "platform" (printf "anchor-%s" .id) }}"><span><b>{{ .name }}</b></span></label>
               <small>{{ .desc }}</small>
-              {{- if not (in (slice "pullup" "platform") .id) }}
-              <label class="chk chk--sub two-only"><input type="checkbox" name="two-{{ .id }}"><span>Room for both Voltras side by side</span></label>
+              {{- if ne .id "platform" }}
+              <label class="chk chk--sub two-only"><input type="checkbox" name="two-{{ .id }}"><span>{{ cond (eq .id "pullup") "Room for both Voltras on it" "Room for both Voltras side by side" }}</span></label>
               {{- end }}
             </span>
           </li>

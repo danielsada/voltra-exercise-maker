@@ -1,6 +1,6 @@
 // Exercises page: draws each exercise; picking a setup redraws it with that rig.
 import * as P from '@params';
-import { $, $$, figureSVG, mountFigure } from './lib/ui.js';
+import { $, $$, figureSVG, mountFigure, showEachSide } from './lib/ui.js';
 
 const exById = new Map(P.exercises.map((e) => [e.id, e]));
 
@@ -14,6 +14,7 @@ for (const li of $$('.ex')) {
     if (!b) return;
     const i = Number(b.dataset.setup);
     mountFigure(fig, figureSVG(ex, i, P.equipment, { title: ex.name }));
+    showEachSide(li, ex, ex.setups[i]);
     $$('.ex__pick', li).forEach((x) => {
       const on = x === b;
       x.setAttribute('aria-pressed', String(on));

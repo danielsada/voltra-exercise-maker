@@ -6,7 +6,7 @@
 <li class="ex" id="ex-{{ $ex.id }}" data-id="{{ $ex.id }}" data-pattern="{{ $ex.pattern }}" data-region="{{ $ex.region }}" data-q="{{ lower (printf "%s %s %s" $ex.name (delimit $ex.muscles " ") $pat.name) }}">
   <div class="ex__fig" aria-hidden="true"></div>
   <div class="ex__body">
-    <h3 class="ex__name">{{ $ex.name }}{{ if $ex.unilateral }} <span class="tag">each side</span>{{ end }}</h3>
+    <h3 class="ex__name">{{ $ex.name }}{{ if $ex.unilateral }} <span class="tag ex__each">each side</span>{{ end }}</h3>
     <p class="ex__meta">{{ $pat.name }} · {{ delimit $ex.muscles ", " }}</p>
     <div class="ex__setup">
       <ul class="ex__setups">

@@ -57,6 +57,7 @@ export function buildWorkout(items, cfg = {}) {
   const phases = [];
   if (!items.length) return [done()];
   if (c.prep) phases.push({ kind: 'prep', seconds: c.prep, label: 'Get ready', item: 0, set: 1, sets: c.circuits });
+  const sideCount = items.map(() => 0); // Tabata: sides keep alternating across circuits, so odd rounds even out
   for (let k = 1; k <= c.circuits; k++) {
     items.forEach((it, i) => {
       // One "work slot" per round; unilateral exercises: Tabata alternates sides, Interval does both sides each round.
@@ -65,7 +66,7 @@ export function buildWorkout(items, cfg = {}) {
         if (it.unilateral && format === 'interval') {
           slots.push({ round: r, side: 'left' }, { round: r, side: 'right' });
         } else if (it.unilateral) {
-          slots.push({ round: r, side: r % 2 ? 'left' : 'right' });
+          slots.push({ round: r, side: sideCount[i]++ % 2 ? 'right' : 'left' });
         } else {
           slots.push({ round: r });
         }
@@ -74,7 +75,8 @@ export function buildWorkout(items, cfg = {}) {
         const at = { item: i, round: sl.round, rounds: block.rounds, set: k, sets: c.circuits };
         if (sl.side) at.side = sl.side;
         phases.push({ kind: 'work', seconds: block.work, label: it.name, ...at });
-        if (j < slots.length - 1 && block.rest) phases.push({ kind: 'rest', seconds: block.rest, label: 'Rest', ...at });
+        // the rest before the next round shows the side that's coming up
+        if (j < slots.length - 1 && block.rest) phases.push({ kind: 'rest', seconds: block.rest, label: 'Rest', ...at, ...(slots[j + 1].side ? { side: slots[j + 1].side } : {}) });
       });
       const lastItem = i === items.length - 1;
       if (!lastItem && c.exRest) {

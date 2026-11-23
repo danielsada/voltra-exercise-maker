@@ -56,7 +56,9 @@ const pick = (list, rng) => list[Math.floor(rng() * list.length)];
 // exercises: full list; available: Map(id → setup index). Returns [{ id, setup }].
 export function compose(exercises, available, { focus = 'full', count = 6, seed = 1 } = {}) {
   const rng = mulberry32(seed);
-  const slots = (FOCUS[focus] || FOCUS.full).slice(0, count);
+  const base = FOCUS[focus] || FOCUS.full;
+  const slots = Array.from({ length: count }, (_, i) => base[i % base.length]); // cycle for long workouts
+  const regions = FOCUS_REGIONS[focus] || [];
   const pool = exercises.filter((e) => available.has(e.id));
   const used = new Set();
   const out = [];
@@ -71,8 +73,10 @@ export function compose(exercises, available, { focus = 'full', count = 6, seed 
   for (const slot of slots) {
     if (take((e) => e.pattern === slot)) continue;
     if ((RELATED[slot] || []).some((p) => take((e) => e.pattern === p))) continue;
-    take((e) => (FOCUS_REGIONS[focus] || []).includes(e.region));
+    take((e) => regions.includes(e.region));
   }
+  // Stay on focus while possible; only then fill from anything that fits.
+  while (out.length < count && take((e) => regions.includes(e.region)));
   while (out.length < count && take(() => true));
   return orderByAnchor(out, exercises);
 }

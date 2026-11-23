@@ -179,6 +179,13 @@ html:not(.js) .js-only { display: none !important; }
 .pw__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 8px 8px 2px; }
 .pw__start { flex: 1 1 100%; min-height: 2.25rem; }
 .pw__time { font-size: .8125rem; color: var(--muted); }
+.pw__time.is-warn { flex-basis: 100%; order: -1; color: var(--ph-prep); font-weight: 600; }
+.pw__h:focus { outline: none; }
+.pw__h:focus-visible { outline: 2px solid var(--accent-ink); }
+.btn.is-disabled { opacity: .5; cursor: not-allowed; }
+.eqlink { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: -4px 0 14px; padding: 10px 12px; border-radius: 10px;
+  background: var(--note); color: var(--note-ink); border: 1px solid var(--note-edge); font-size: .875rem; }
+.eqlink .tool { min-height: 2rem; color: inherit; }
 .pw__clear { margin-left: auto; min-height: 1.75rem; padding: 2px 8px; font-size: .8125rem; }
 
 .cx-fab {
