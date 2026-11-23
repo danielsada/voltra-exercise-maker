@@ -1,7 +1,6 @@
 ---
 title: Composer
-description: Pick your Voltras, anchor points and attachments to see every exercise your setup allows, compose a balanced workout and run it in the Tabata or interval timer. A hobby page, not affiliated with Beyond Power.
+description: "See every Voltra exercise your anchors and attachments allow, compose a balanced workout and run it in a Tabata or interval timer."
 params:
-  view: composer
-  script: composer
+  script: composer   # the home widget is the composer (hugo.toml [params.home])
 ---

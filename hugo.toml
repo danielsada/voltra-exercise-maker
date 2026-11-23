@@ -10,7 +10,7 @@ capitalizeListTitles = false
 # No posts here: without this Hugo picks the root pages as the main section and the theme renders them as blog posts.
 mainSections = ["none"]
 
-enableRobotsTXT = true
+enableRobotsTXT = true   # layouts/robots.txt (points to the sitemap)
 # A tool site, not a blog: no posts, feeds or taxonomies.
 disableKinds = ["taxonomy", "term", "rss"]
 
@@ -24,15 +24,14 @@ disableKinds = ["taxonomy", "term", "rss"]
       block = true
 
 [params]
-  description = "A hobby page for planning Beyond Power VOLTRA I workouts: Tabata and interval timers, and an exercise composer that only picks what your Voltras, handles and anchors allow. Not affiliated with Beyond Power."
+  description = "A hobby page for Beyond Power VOLTRA I owners: an exercise composer that fits your equipment, plus Tabata and interval timers."
   tagline = "Voltra timers & exercise composer"
   logo = "images/DanielSadaLogo.png"
   favicon = "favicon.ico"
   ogimage = "images/og-image.png"
   crumbroot = "Voltra Exercise Maker"
   colorscheme = "auto"
-  # The main site; the logo links to it (layouts/_partials/breeze/identity.html).
-  mainsite = "https://danielsada.tech/"
+  homeurl = "https://danielsada.tech/"   # the panel logo links back to the blog (theme param)
   repo = "https://github.com/danielsada/voltra-exercise-maker"
   [params.author]
     name = "Daniel Sada"
@@ -52,19 +51,26 @@ disableKinds = ["taxonomy", "term", "rss"]
 
   [params.panel]
     width = "17rem"
-  # This site's own panel sections, below Places: the tools (menus.voltra), the composer's workout (only on the
-  # composer page), then menus.guide without a title (layouts/_partials/breeze/panel-projects.html), like
-  # ninja.danielsada.tech.
+  # This site's own panel sections, below Places, in order (layouts/_partials/breeze/panel-projects.html):
+  # {menu, title} = a list of [[menus.<menu>]] (no title = a plain list); {partial} = a site-specific partial.
   [[params.panel.sections]]
     menu = "voltra"
     title = "Voltra"
   [[params.panel.sections]]
-    workout = true
+    partial = "voltra/panel-workout.html"
   [[params.panel.sections]]
     menu = "guide"
+  [[params.panel.sections]]
+    partial = "voltra/panel-install.html"
 
   [params.rss]
     panel = false
+
+  # The home page is the composer, as a home widget (layouts/_partials/home/composer.html).
+  [params.home]
+    side = []   # no side column (the theme's defaults would add empty project/talk widgets)
+    [[params.home.main]]
+      widget = "composer"
 
   [params.post]
     progress = false
@@ -138,6 +144,8 @@ disableKinds = ["taxonomy", "term", "rss"]
     [menus.guide.params]
       icon = "info"
 
+  # Elsewhere, the same as danielsada.tech, with the blog's feed. Its http(s) links are also the JSON-LD Person's
+  # sameAs (layouts/_partials/hooks/head-end.html).
   [[menus.social]]
     name = "GitHub"
     url = "https://github.com/danielsada"
@@ -151,8 +159,14 @@ disableKinds = ["taxonomy", "term", "rss"]
     [menus.social.params]
       icon = "linkedin"
   [[menus.social]]
-    name = "X (Twitter)"
-    url = "https://x.com/danielsadac"
+    name = "Fediverse"
+    url = "https://infosec.exchange/@dsada"
     weight = 30
     [menus.social.params]
-      icon = "x"
+      icon = "globe"
+  [[menus.social]]
+    name = "RSS feed"
+    url = "https://danielsada.tech/index.xml"
+    weight = 40
+    [menus.social.params]
+      icon = "rss"

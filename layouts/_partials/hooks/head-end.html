@@ -1,6 +1,31 @@
-{{- /* Site hook (theme: layouts/_partials/hooks/head-end.html). Publishes the social preview image
-  (params.ogimage = images/og-image.png) once, made by Hugo from the logo: 1200×630 in the site's wall colour,
-  with the title in Hugo's built-in font. No external tools or requests. */ -}}
+{{- /* Site hook (theme: layouts/_partials/hooks/head-end.html): search-engine extras. The theme's head.html already
+  renders the title, description, canonical URL, Open Graph and Twitter tags.
+  Schema.org JSON-LD: home → WebSite + Person; every other page → WebPage + BreadcrumbList. The Person is the blog's
+  (url = params.homeurl, sameAs = the http(s) links of [[menus.social]] that aren't on the blog), so it matches
+  danielsada.tech's own Person node. Keywords from the page's or the site's params.keywords.
+  Also: the social preview image (params.ogimage, made by Hugo from the logo) and the installable app (voltra/pwa.html). */ -}}
+{{- $author := site.Params.author | default (dict) -}}
+{{- $main := site.Params.homeurl | default site.Home.Permalink -}}
+{{- $mainHost := (urls.Parse $main).Host -}}
+{{- $sameAs := slice -}}
+{{- range site.Menus.social }}{{ if and (strings.HasPrefix .URL "http") (ne (urls.Parse .URL).Host $mainHost) }}{{ $sameAs = $sameAs | append .URL }}{{ end }}{{ end -}}
+{{- $person := dict "@type" "Person" "@id" (print $main "#person") "name" ($author.name | default site.Title) "url" $main -}}
+{{- with $sameAs }}{{ $person = merge $person (dict "sameAs" .) }}{{ end -}}
+{{- $website := dict "@type" "WebSite" "@id" (print site.Home.Permalink "#website") "url" site.Home.Permalink "name" site.Title "description" site.Params.description "inLanguage" site.Language.Locale "author" (dict "@id" (print $main "#person")) -}}
+{{- $graph := slice -}}
+{{- if .IsHome -}}
+  {{- $graph = $graph | append $website $person -}}
+{{- else -}}
+  {{- $graph = $graph | append (dict "@type" "WebPage" "@id" .Permalink "url" .Permalink "name" .Title "description" (.Description | default site.Params.description) "inLanguage" site.Language.Locale "isPartOf" (dict "@id" (print site.Home.Permalink "#website")) "author" $person) -}}
+  {{- $items := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.Home.Permalink) -}}
+  {{- range .Ancestors.Reverse }}{{ if not .IsHome }}{{ $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .LinkTitle "item" .Permalink) }}{{ end }}{{ end -}}
+  {{- $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .LinkTitle "item" .Permalink) -}}
+  {{- $graph = $graph | append (dict "@type" "BreadcrumbList" "itemListElement" $items) -}}
+{{- end }}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" $graph | jsonify | safeJS }}</script>
+{{- with .Params.keywords | default site.Params.keywords }}
+<meta name="keywords" content="{{ delimit . ", " }}">
+{{- end }}
 {{- if .IsHome -}}
   {{- with resources.Get "images/DanielSadaLogo.png" -}}
     {{- $wall := site.Params.colors.wall | default "#3d6fd6" -}}

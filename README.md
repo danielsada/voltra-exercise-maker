@@ -66,14 +66,15 @@ configuration and extension points:
 | What | Where |
 |---|---|
 | Identity, colours, menus | `hugo.toml` |
-| Logo links to danielsada.tech | `layouts/_partials/breeze/identity.html` |
-| Panel: Places (the same links as danielsada.tech), then this site's sections (`params.panel.sections` → `menus.voltra`, the composer's workout, `menus.guide`), as on ninja.danielsada.tech | `hugo.toml`, `layouts/_partials/breeze/panel-projects.html`, `layouts/_partials/voltra/panel-workout.html` |
-| Home page = the composer | `content/_index.md` (`params.view: composer`), `layouts/home.html` |
+| Logo links to danielsada.tech | `params.homeurl` in `hugo.toml` (a theme setting) |
+| Panel: Places and Elsewhere (the same as danielsada.tech), then this site's sections (`params.panel.sections`: `menus.voltra`, the composer's workout, `menus.guide`, Install app), as in side-project-template | `hugo.toml`, `layouts/_partials/breeze/panel-projects.html`, `layouts/_partials/voltra/panel-{workout,install}.html` |
+| Home page = the composer (a home widget) | `[params.home]` in `hugo.toml`, `layouts/_partials/home/composer.html` |
 | Redirects (old `/composer/` links) | `static/_redirects` |
 | Composer, Timer and Exercises pages | `content/_index.md`, `content/*.md` with `params.view` → `layouts/_partials/views/{timer,composer,exercises}.html` |
 | Page scripts | `params.script: <name>` → `assets/js/<name>-page.js` (bundled in `layouts/_partials/voltra/script.html`) |
 | Footer disclaimer | `layouts/_partials/hooks/body-end.html` |
-| Social preview image (made by Hugo from the logo) | `layouts/_partials/hooks/head-end.html` |
+| JSON-LD (WebSite + Person on home, WebPage + BreadcrumbList elsewhere), social preview image, PWA tags | `layouts/_partials/hooks/head-end.html` |
+| robots.txt (with the sitemap) | `layouts/robots.txt` |
 | Extra CSS | `assets/css/custom.css` |
 | Extra icons | `assets/breeze/icons/` |
 

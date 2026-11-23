@@ -1,6 +1,6 @@
 ---
 title: Anchors & attachments
-description: How this site models the Beyond Power VOLTRA I, its anchor points, the Travel Platform, handles and bars, and using two Voltras. With sources, and a note on what isn't confirmed.
+description: "How the composer models the VOLTRA I: anchor points, the Travel Platform, handles and bars, and two Voltras, with sources and what isn't confirmed."
 params:
   script: equipment
 ---

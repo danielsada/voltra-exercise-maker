@@ -1,0 +1,8 @@
+{{- /* "Install app" panel section: shown by assets/js/app-page.js when the browser can install the site (on iPhone
+  and iPad, how to add it to the Home Screen). Context: the page. */ -}}
+<div class="appnav appnav--plain pwa js-only" id="install-box" hidden>
+  <ul class="nav">
+    <li><button type="button" class="nav__btn" id="install" hidden>{{ partial "breeze/icon.html" "download" }}Install app</button></li>
+  </ul>
+  <p class="pwa__ios" id="install-ios" hidden>To install on iPhone or iPad: tap {{ partial "breeze/icon.html" "share" }} <b>Share</b>, then <b>Add to Home Screen</b>.</p>
+</div>

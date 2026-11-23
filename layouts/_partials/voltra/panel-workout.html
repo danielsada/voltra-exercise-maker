@@ -1,5 +1,6 @@
 {{- /* The composer's workout, as a panel section (so it stays in view while you browse exercises; in the phone drawer
-  too). Filled in by assets/js/composer-page.js. Context: the page. */ -}}
+  too). Only on pages that load the composer script; filled in by assets/js/composer-page.js. Context: the page. */ -}}
+{{- if eq .Params.script "composer" }}
 {{- $timer := site.GetPage "/timer" -}}
 <section class="appnav pw js-only" id="workout" aria-labelledby="pw-h">
   <h2 class="ph pw__h" id="pw-h" tabindex="-1"><span>Your workout</span><span class="pw__count" id="workcount"></span></h2>
@@ -12,3 +13,4 @@
     <button type="button" class="tool pw__clear" id="workclear">Clear</button>
   </div>
 </section>
+{{- end }}

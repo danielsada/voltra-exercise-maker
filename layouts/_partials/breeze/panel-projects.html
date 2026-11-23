@@ -1,14 +1,14 @@
-{{- /* Site override of the theme's panel-projects.html: the slot right below Places in the panel (this site doesn't use
-  the theme's Projects box). Renders this site's own sections from params.panel.sections ({menu, title}), each a
-  Places-style list of [[menus.<menu>]], so Places itself can stay identical to danielsada.tech. A section without a
-  title is a plain list. Links with a #fragment (a function on a chart page) are never marked current.
-  A section with workout = true is the composer's workout (voltra/panel-workout.html), on pages that load the
-  composer script only. Context dict: page, isPost. */ -}}
+{{- /* Side-project override of the theme's breeze/panel-projects.html: the slot right below Places in the panel (side
+  projects don't use the theme's Projects box). Renders this site's own sections from params.panel.sections, in order,
+  so Places itself stays identical to danielsada.tech:
+  - {menu, title}: a Places-style list of [[menus.<menu>]]; no title = a plain list. Entries take params.icon (sprite
+    id, default "folder"). Links with a #fragment are never marked current.
+  - {partial}: layouts/_partials/<partial>, called with the page, for site-specific extras.
+  Context dict: page, isPost. */ -}}
 {{- $p := .page -}}
-{{- range $i, $s := (site.Params.panel | default (dict)).sections }}
-{{- if $s.workout }}
-  {{- if eq $p.Params.script "composer" }}{{ partial "voltra/panel-workout.html" $p }}{{ end }}
-{{- end }}
+{{- range (site.Params.panel | default (dict)).sections }}
+{{- $s := . }}
+{{- with $s.partial }}{{ partial . $p }}{{ end }}
 {{- with index site.Menus ($s.menu | default "") }}
 {{- $id := printf "app-%s-h" $s.menu }}
 <nav class="appnav{{ if not $s.title }} appnav--plain{{ end }}"{{ with $s.title }} aria-labelledby="{{ $id }}"{{ else }} aria-label="{{ site.Title }}"{{ end }}>
@@ -24,10 +24,3 @@
 </nav>
 {{- end }}
 {{- end }}
-{{- /* "Install app": shown by assets/js/app-page.js when the browser can install the site (or on iOS, how to). */}}
-<div class="appnav appnav--plain pwa js-only" id="install-box" hidden>
-  <ul class="nav">
-    <li><button type="button" class="nav__btn" id="install" hidden>{{ partial "breeze/icon.html" "download" }}Install app</button></li>
-  </ul>
-  <p class="pwa__ios" id="install-ios" hidden>To install on iPhone or iPad: tap {{ partial "breeze/icon.html" "share" }} <b>Share</b>, then <b>Add to Home Screen</b>.</p>
-</div>
