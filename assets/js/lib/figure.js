@@ -9,6 +9,8 @@
 //   thigh     thigh from straight down; + knee forward (90 = horizontal in front).
 //   knee      flexion: + folds the shin back.  leg 1 = stance/root leg, leg 2 = other leg (`thigh2`, `knee2`).
 //   shoulder2/elbow2 = the far arm (defaults to the near arm).
+//   rise      lifts the heels (px; calf raises).  shrug  lifts the shoulders (px; also in front view).
+//   Lying on the back: torso -90 (head to the left); face down: torso 90 (head to the right).
 // Front view (+x = image right):
 //   lean (side bend, + right), stance (legs apart), squat (hip flexion, shortens the legs),
 //   abduct/elbow (both arms, mirrored) or abductL/elbowL/abductR/elbowR, leg2 (right leg out to the side),
@@ -28,8 +30,8 @@ const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 const r1 = (n) => Math.round(n * 10) / 10;
 const pt = (p) => `${r1(p[0])} ${r1(p[1])}`;
 
-const SIDE = { torso: 0, head: 0, shoulder: 0, elbow: 8, shoulder2: null, elbow2: null, thigh: 0, knee: 0, thigh2: null, knee2: null };
-const FRONT = { lean: 0, stance: 8, squat: 0, leg2: null, abduct: 10, elbow: 6, flex: 0, abductL: null, elbowL: null, flexL: null, abductR: null, elbowR: null, flexR: null, reach: null, ext: 0.8 };
+const SIDE = { torso: 0, head: 0, shoulder: 0, elbow: 8, shoulder2: null, elbow2: null, thigh: 0, knee: 0, thigh2: null, knee2: null, rise: 0, shrug: 0 };
+const FRONT = { lean: 0, stance: 8, squat: 0, shrug: 0, leg2: null, abduct: 10, elbow: 6, flex: 0, abductL: null, elbowL: null, flexL: null, abductR: null, elbowR: null, flexR: null, reach: null, ext: 0.8 };
 
 function fill(p, view) {
   const q = { ...(view === 'front' ? FRONT : SIDE), ...p };
@@ -42,7 +44,11 @@ function fill(p, view) {
 }
 
 function footFor(ankle, shinAngle, ground, flat) {
-  if (flat) return add(ankle, [L.foot, 0]);
+  if (flat) {
+    // flat foot; on the toes when the ankle is lifted (calf raises)
+    const dy = Math.max(0, ground - 3 - ankle[1]);
+    return add(ankle, [Math.sqrt(Math.max(0, L.foot * L.foot - dy * dy)), dy]);
+  }
   const t = add(ankle, down(shinAngle + 90, L.foot));
   return [t[0], Math.min(t[1], ground)];
 }
@@ -69,7 +75,7 @@ export function sideJoints(p, base, x0, ground) {
     j.leg2 = leg(j.hip, p.thigh2, p.knee2);
   } else {
     // stand / split: the near (stance) foot is planted
-    const ankle = [x0, ground - 3];
+    const ankle = [x0, ground - 3 - p.rise];
     const knee = sub(ankle, down(p.thigh - p.knee, L.shin));
     j.hip = sub(knee, down(p.thigh, L.thigh));
     j.leg1 = { knee, ankle };
@@ -81,7 +87,7 @@ export function sideJoints(p, base, x0, ground) {
     ? add(j.leg2.ankle, [-2, 3])
     : footFor(j.leg2.ankle, p.thigh2 - p.knee2, ground, base === 'stand' && p.thigh2 === p.thigh && p.knee2 === p.knee);
   if (base === 'kneel') j.leg1.toe = j.leg2.toe;
-  j.shoulder = add(j.hip, up(p.torso, L.torso));
+  j.shoulder = add(j.hip, up(p.torso, L.torso + p.shrug));
   j.neck = add(j.shoulder, up(p.torso + p.head, L.neck));
   j.headC = add(j.shoulder, up(p.torso + p.head, L.neck + L.head));
   const arm = (sh, el) => {
@@ -115,7 +121,7 @@ function ik(s, t, outSign) {
 
 export function frontJoints(p, x0, ground, base) {
   const j = {};
-  if (base === 'kneel') {
+  if (base === 'kneel' || base === 'halfkneel') {
     const hc = [x0, ground - 4 - L.thigh];
     j.hc = hc;
     j.hipL = sub(hc, [L.hipW, 0]);
@@ -126,6 +132,12 @@ export function frontJoints(p, x0, ground, base) {
     j.ankleR = add(j.kneeR, [1, 2]);
     j.toeL = add(j.ankleL, [-4, 1]);
     j.toeR = add(j.ankleR, [4, 1]);
+    if (base === 'halfkneel') {
+      // right foot forward: the thigh points at the viewer (short), the shin stands on the floor
+      j.kneeR = add(j.hipR, [3, 8]);
+      j.ankleR = [j.kneeR[0] + 1, ground - 3];
+      j.toeR = add(j.ankleR, [6, 0]);
+    }
     return upperFront(j, p);
   }
   const lt = L.thigh * Math.max(0.35, Math.cos(rad(p.squat)));
@@ -152,7 +164,7 @@ export function frontJoints(p, x0, ground, base) {
 }
 
 function upperFront(j, p) {
-  j.sc = add(j.hc, up(p.lean, L.torso));
+  j.sc = add(j.hc, up(p.lean, L.torso + p.shrug));
   const perp = [Math.cos(rad(p.lean)), Math.sin(rad(p.lean))];
   j.shL = sub(j.sc, [perp[0] * L.shW, perp[1] * L.shW]);
   j.shR = add(j.sc, [perp[0] * L.shW, perp[1] * L.shW]);
@@ -270,6 +282,7 @@ function frame(fig, pose, ctx) {
     const handR = j.armR.hand;
     if (fig.attach === 'ankle') ends = [j.ankleR];
     else if (fig.attach === 'harness') ends = [add(j.hc, [0, 4])];
+    else if (fig.attach === 'chest') ends = [add(j.sc, [0, 6])];
     else if (units === 2) ends = r.units.length === 2 ? [handL, handR] : [mid(handL, handR)];
     else if (fig.hand === 'L') ends = [handL];
     else if (fig.hand === 'R') ends = [handR];
@@ -296,12 +309,14 @@ function frame(fig, pose, ctx) {
     f.body = `${leg(j.leg1)}L${pt(j.shoulder)}L${pt(j.neck)}M${pt(j.shoulder)}L${pt(j.arm1.elbow)}L${pt(j.arm1.hand)}`;
     f.head = j.headC;
     const harnessPt = add(j.hip, up(pose.torso, 10));
-    if (fig.attach === 'ankle') ends = [j.leg2.ankle];
+    const strapLeg = fig.leg === 1 ? j.leg1 : j.leg2;
+    if (fig.attach === 'ankle') ends = [strapLeg.ankle];
+    else if (fig.attach === 'chest') ends = [add(j.shoulder, up(pose.torso + 90, 4))];
     else if (fig.attach === 'harness') ends = [add(harnessPt, up(pose.torso + 90, 6))];
     else ends = [j.arm1.hand];
     if (gear === 'bar') f.gear = loop(j.arm1.hand, 2.6);
     else if (gear === 'harness') f.gear = `M${pt(add(j.shoulder, up(pose.torso + 90, 3)))}L${pt(ends[0])}L${pt(harnessPt)}`;
-    else if (gear === 'strap') f.gear = loop(j.leg2.ankle, 3.2);
+    else if (gear === 'strap') f.gear = loop(strapLeg.ankle, 3.2);
     else f.gear = handleAt(j.arm1.hand, gear);
   }
   f.cables = r.units.map((u, i) => {

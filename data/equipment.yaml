@@ -43,34 +43,20 @@ attachments:
     groups: [bar1]
     gear: bar
     note: 24" or 48". We assume it clips to one cable at its centre; Beyond Power doesn't say.
-  - id: alumacore-bar
-    name: AlumaCore Bar
+  - id: alumacore-fusioncore
+    name: AlumaCore / FusionCore Bar
     icon: bar
     count: bool
     groups: [bar1]
     gear: bar
-    note: 24". We assume it clips to one cable at its centre.
-  - id: fusioncore-bar
-    name: FusionCore Bar
-    icon: bar
-    count: bool
-    groups: [bar1]
-    gear: bar
-    note: 24", with a swivel. We assume it clips to one cable at its centre.
+    note: Either 24" bar. We assume it clips to one cable at its centre.
   - id: carbon-bar-hooks
     name: Carbon Bar with Hooks
     icon: bar
     count: bool
     groups: [bar2]
     gear: bar
-    note: 36" or 52". We assume the end hooks take one Voltra each (two-Voltra bar); Beyond Power doesn't say.
-  - id: darth-sabar
-    name: Darth SaBar
-    icon: bar
-    count: bool
-    groups: [bar1, bar2]
-    gear: bar
-    note: Limited edition. Comes as a centre-hook bar (one Voltra) and a dual-hook bar (two Voltras).
+    note: 36" or 52", a hook at each end, so it spans two Voltras (one per hook).
 
 # Group names, for setups that accept any attachment in a group.
 groups:
@@ -123,6 +109,7 @@ patterns:
   hinge: { name: Hinge, region: lower }
   lunge: { name: Lunge, region: lower }
   glutes: { name: Glutes & hips, region: lower }
+  calves: { name: Calves, region: lower }
   push-horizontal: { name: Horizontal push, region: upper }
   push-vertical: { name: Vertical push, region: upper }
   pull-horizontal: { name: Horizontal pull, region: upper }

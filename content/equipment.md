@@ -48,19 +48,27 @@ Voltra comes with a carabiner but no handle or mount
 | Ankle Straps | Sold as a pair. Used for kickbacks, leg curls, abduction and knee drives. |
 | Functional Rope | Pushdowns, face pulls, hammer curls, crunches and pull-throughs. |
 | Squat Harness | A shoulder and ribcage harness ([product page](https://www.beyond-power.com/products/squat-harness)), used for harness squats on the platform. |
-| Carbon Bar with Premium Grip, AlumaCore Bar, FusionCore Bar | Treated as **single-cable bars** (one Voltra, centre hook). *Not confirmed by Beyond Power.* |
-| Carbon Bar with Hooks | Treated as the **two-Voltra bar** (one Voltra per end hook). *Not confirmed by Beyond Power; inferred from the name.* |
-| Darth SaBar | Comes as a centre-hook bar and a dual-hook bar, so it counts as both ([help article](https://help.beyond-power.com/en/articles/11000491-anything-about-darth-sabar-limited-edition)). |
+| Carbon Bar with Premium Grip, AlumaCore / FusionCore Bar | Treated as **single-cable bars** (one Voltra, centre hook). AlumaCore and FusionCore count as one choice, since either 24" bar does the same jobs here. *How these bars attach isn't confirmed by Beyond Power.* |
+| Carbon Bar with Hooks | The **two-Voltra bar**: a hook at each end, one Voltra per hook (deadlifts, squats, rows, presses with both units). |
 
-The Rotator Add-on, Heavy-Duty Resistance Cord, Premium Carabiner and Carbon Mobility Stick aren't used by the
-composer.
+The Darth SaBar, Rotator Add-on, Heavy-Duty Resistance Cord, Premium Carabiner and Carbon Mobility Stick aren't used
+by the composer.
 
 ## Two Voltras
 
 Beyond Power's *Twin Mode* pairs two units so that changes on one apply to both
 ([how to pair](https://help.beyond-power.com/en/articles/10124771-how-do-i-pair-two-voltra-i-devices-in-twin-mode)).
-With two Voltras, the composer prefers setups that use both: a handle in each hand from two anchor points, or a bar
-across both cables.
+With two Voltras, the composer prefers setups that use both: a handle in each hand from two anchor points, both
+Voltras on the pull-up bar, or the Carbon Bar with Hooks across both cables.
+
+## Where the exercises come from
+
+The library mixes standard cable exercises with moves from Beyond Power's own lists, including the
+[VOLTRA I Movement Bank](https://www.beyond-power.com/pages/voltra-i-movement-bank) and the help centre's
+[full-body templates](https://help.beyond-power.com/en/articles/14247195-full-body-home-workout-templates) and
+[lower-body training](https://help.beyond-power.com/en/articles/14247201-lower-body-training-without-a-leg-press)
+articles. The names, cues, setups and drawings on this site are my own. Where Beyond Power only lists an exercise's
+name, the setup the composer suggests is my best guess.
 
 ## Numbers I didn't use
 
