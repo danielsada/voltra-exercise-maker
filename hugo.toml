@@ -31,7 +31,7 @@ disableKinds = ["taxonomy", "term", "rss"]
   ogimage = "images/og-image.png"
   crumbroot = "Voltra Exercise Maker"
   colorscheme = "auto"
-  # The main site; linked from Places and the home page.
+  # The main site; the logo links to it (layouts/_partials/breeze/identity.html).
   mainsite = "https://danielsada.tech/"
   repo = "https://github.com/danielsada/voltra-exercise-maker"
   [params.author]
@@ -69,18 +69,6 @@ disableKinds = ["taxonomy", "term", "rss"]
   [params.post]
     progress = false
 
-  [params.home]
-    [[params.home.main]]
-      widget = "intro"
-    [[params.home.main]]
-      widget = "quickstart"
-      title = "Start training"
-    [[params.home.side]]
-      widget = "disclaimer"
-      title = "Hobby project"
-    [[params.home.side]]
-      widget = "mainsite"
-      title = "From danielsada.tech"
 
   # Voltra-specific settings (layouts/_partials/voltra/*, assets/js/*).
   [params.voltra]
@@ -122,13 +110,8 @@ disableKinds = ["taxonomy", "term", "rss"]
     [menus.main.params]
       icon = "mail"
 
-  # This site's own pages (see params.panel.sections). The logo links to danielsada.tech, so Home comes first here.
-  [[menus.voltra]]
-    name = "Home"
-    pageRef = "/"
-    weight = 5
-    [menus.voltra.params]
-      icon = "home"
+  # This site's own pages (see params.panel.sections). The logo links to danielsada.tech; the composer is this
+  # site's home page (content/_index.md), so it comes first, with the home icon.
   [[menus.voltra]]
     name = "Timer"
     pageRef = "/timer"
@@ -137,10 +120,10 @@ disableKinds = ["taxonomy", "term", "rss"]
       icon = "timer"
   [[menus.voltra]]
     name = "Composer"
-    pageRef = "/composer"
-    weight = 20
+    pageRef = "/"
+    weight = 5
     [menus.voltra.params]
-      icon = "dumbbell"
+      icon = "home"
   [[menus.voltra]]
     name = "Exercises"
     pageRef = "/exercises"

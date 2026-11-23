@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects. The composer moved to the home page; old links (and their #… setups) still work.
+/composer   /   301
+/composer/  /   301

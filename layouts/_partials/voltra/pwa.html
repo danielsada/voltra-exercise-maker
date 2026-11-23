@@ -10,7 +10,7 @@
 {{- $apple := $any.Resize "180x180" | resources.Copy "icons/apple-touch-icon.png" -}}
 
 {{- $timer := site.GetPage "/timer" -}}
-{{- $composer := site.GetPage "/composer" -}}
+{{- $composer := site.Home -}}
 {{- $exercises := site.GetPage "/exercises" -}}
 {{- $manifest := dict
   "id" site.Home.RelPermalink

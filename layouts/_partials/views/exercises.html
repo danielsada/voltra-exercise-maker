@@ -2,7 +2,7 @@
   assets/js/exercises-page.js draws the figures; pick a setup to see its drawing. */ -}}
 {{- $data := partialCached "voltra/data.html" . "voltra-data" -}}
 {{- $eq := $data.equipment -}}
-{{- $composer := site.GetPage "/composer" -}}
+{{- $composer := site.Home -}}
 <div class="vx">
   <section class="card intro vx-head" aria-labelledby="page-h">
     <p class="kicker">Exercise library</p>
